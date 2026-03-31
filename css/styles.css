@@ -13,16 +13,18 @@
 }
 
 .nav {
-    align-items: center;
-    text-align: center;
+    align-items: left;
+    text-align: left;
     background-color: #444;
     color: #fff;
     padding: 10px;
 }
 
 .main {
-    background-color: #fff;
+    background-color: #444;
     padding: 10px;
+    align-items: center;
+    text-align: center;
 }
 
 .footer {
