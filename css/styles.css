@@ -32,3 +32,19 @@
     color: #fff;
     padding: 10px;
 }
+
+.card {
+    width: 150px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(232, 148, 3, 0.786);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.contenedor-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+}
