@@ -44,9 +44,10 @@
 }
 
 .contenedor-cards {
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
     gap: 20px;
     padding: 20px;
     justify-content: center;
+
 }
