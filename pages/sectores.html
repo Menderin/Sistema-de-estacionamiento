@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/css/output.css">
+    <link rel="icon" href="../assets/img/favicon.png" type="image/png">
+    <title>Sectores - Estacionamiento UCN CQBO</title>
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-800 flex flex-col min-h-screen">
+    <!-- Header igual al de index.html -->
+    <header class="bg-gray-800 text-white p-4 flex items-center justify-between md:px-8">
+        <img src="../assets/img/logo_ucn.png" alt="Logo UCN" class="h-12 w-auto">
+        <h1 class="text-2xl md:text-3xl font-bold text-center flex-grow">Estacionamientos UCN CQBO</h1>
+        <div class="w-12"></div>
+    </header>
+
+    <nav class="bg-gray-700 text-white p-3">
+        <ul class="flex flex-col sm:flex-row justify-center gap-4 text-center">
+            <li><a href="../index.html" class="hover:text-blue-300">Inicio</a></li>
+            <li><a href="sectores.html" class="text-blue-300 font-semibold border-b-2 border-blue-300 pb-1">Sectores</a>
+            </li>
+            <li><a href="administracion.html" class="hover:text-blue-300">Administración</a></li>
+            <li><a href="contacto.html" class="hover:text-blue-300">Contacto y ubicación</a></li>
+        </ul>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="flex-grow w-full max-w-6xl mx-auto p-6 md:p-12">
+        <section class="text-center mb-10">
+            <h2 class="text-3xl font-bold text-blue-900">Sectores</h2>
+            <p class="text-gray-600 mt-2 text-lg">Aquí puedes ver los sectores de estacionamiento disponibles</p>
+        </section>
+
+        <!-- Contenedor Cards (Grid Responsivo) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            <div
+                class="bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-6xl font-black mb-2">A</h2>
+                <p class="font-medium text-xl mb-6">Sector Guacolda</p>
+                <a href="sector_a.html"
+                    class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver
+                    espacios</a>
+            </div>
+
+            <div
+                class="bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-6xl font-black mb-2">B</h2>
+                <p class="font-medium text-xl mb-6">Sector G5</p>
+                <a href="sector_b.html"
+                    class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver
+                    espacios</a>
+            </div>
+
+            <div
+                class="bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-6xl font-black mb-2">C</h2>
+                <p class="font-medium text-xl mb-6">Sector Vicerrectoría</p>
+                <a href="sector_c.html"
+                    class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver
+                    espacios</a>
+            </div>
+
+            <div
+                class="bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-6xl font-black mb-2">D</h2>
+                <p class="font-medium text-xl mb-6">Sector G6</p>
+                <a href="sector_d.html"
+                    class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver
+                    espacios</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer igual al de index.html -->
+    <footer class="bg-gray-800 text-white text-center p-4 mt-auto">
+        <p>Copyright © 2026 Estacionamiento UCN CQBO</p>
+    </footer>
+</body>
+
+</html>
