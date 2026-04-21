@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -20,8 +20,7 @@
     <nav class="bg-gray-700 text-white p-3">
         <ul class="flex flex-col sm:flex-row justify-center gap-4 text-center">
             <li><a href="../index.html" class="hover:text-blue-300">Inicio</a></li>
-            <li><a href="sectores.html" class="text-blue-300 font-semibold border-b-2 border-blue-300 pb-1">Sectores</a>
-            </li>
+            <li><a href="sectores.html" class="text-blue-300 font-semibold border-b-2 border-blue-300 pb-1">Sectores</a></li>
             <li><a href="administracion.html" class="hover:text-blue-300">Administración</a></li>
             <li><a href="contacto.html" class="hover:text-blue-300">Contacto y ubicación</a></li>
         </ul>
@@ -34,52 +33,122 @@
             <p class="text-gray-600 mt-2 text-lg">Aquí puedes ver los sectores de estacionamiento disponibles</p>
         </section>
 
-        <!-- Contenedor Cards (Grid Responsivo) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Vista de Sectores -->
+        <div id="sectores-view">
+            <!-- Contenedor Cards (Grid Responsivo) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="sector-card bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300" data-sector="A">
+                    <h2 class="text-6xl font-black mb-2">A</h2>
+                    <p class="font-medium text-xl mb-6">Sector Guacolda</p>
+                    <button class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver espacios</button>
+                </div>
 
-            <div
-                class="bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
-                <h2 class="text-6xl font-black mb-2">A</h2>
-                <p class="font-medium text-xl mb-6">Sector Guacolda</p>
-                <a href="sector_a.html"
-                    class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver
-                    espacios</a>
+                <div class="sector-card bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300" data-sector="B">
+                    <h2 class="text-6xl font-black mb-2">B</h2>
+                    <p class="font-medium text-xl mb-6">Sector G5</p>
+                    <button class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver espacios</button>
+                </div>
+
+                <div class="sector-card bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300" data-sector="C">
+                    <h2 class="text-6xl font-black mb-2">C</h2>
+                    <p class="font-medium text-xl mb-6">Sector Vicerrectoría</p>
+                    <button class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver espacios</button>
+                </div>
+
+                <div class="sector-card bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300" data-sector="D">
+                    <h2 class="text-6xl font-black mb-2">D</h2>
+                    <p class="font-medium text-xl mb-6">Sector G6</p>
+                    <button class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver espacios</button>
+                </div>
             </div>
+        </div>
 
-            <div
-                class="bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
-                <h2 class="text-6xl font-black mb-2">B</h2>
-                <p class="font-medium text-xl mb-6">Sector G5</p>
-                <a href="sector_b.html"
-                    class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver
-                    espacios</a>
+        <!-- Vista de Sector Individual -->
+        <div id="sector-view" class="hidden">
+            <button id="back-btn" class="mb-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">← Volver a Sectores</button>
+            <div class="w-full flex flex-col items-center">
+                <!-- Barra de Título y Leyenda -->
+                <div class="w-full bg-white shadow-sm p-4 flex flex-col md:flex-row justify-between items-center z-10 relative">
+                    <h2 id="sector-title" class="text-2xl font-bold text-blue-900 mb-2 md:mb-0">Mapa: Sector</h2>
+                    <div class="flex gap-6 text-sm font-semibold text-gray-700">
+                        <div class="flex items-center gap-2"><span class="w-4 h-4 bg-green-500 rounded border border-green-600 block"></span> Disponible</div>
+                        <div class="flex items-center gap-2"><span class="w-4 h-4 bg-red-500 rounded border border-red-600 block"></span> Ocupado</div>
+                    </div>
+                </div>
+
+                <!-- Contenedor del Mapa -->
+                <div class="w-full flex-grow relative bg-gray-300 border-t border-gray-400 overflow-hidden flex items-center justify-center p-4 md:p-10" id="mapa-contenedor">
+                    <!-- Grilla de Espacios -->
+                    <div id="espacios-grid" class="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-9 gap-3">
+                        <!-- Espacios se cargarán dinámicamente -->
+                    </div>
+                </div>
             </div>
-
-            <div
-                class="bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
-                <h2 class="text-6xl font-black mb-2">C</h2>
-                <p class="font-medium text-xl mb-6">Sector Vicerrectoría</p>
-                <a href="sector_c.html"
-                    class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver
-                    espacios</a>
-            </div>
-
-            <div
-                class="bg-orange-500 text-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
-                <h2 class="text-6xl font-black mb-2">D</h2>
-                <p class="font-medium text-xl mb-6">Sector G6</p>
-                <a href="sector_d.html"
-                    class="mt-auto bg-white text-orange-600 px-5 py-2 rounded-lg font-bold hover:bg-orange-50 shadow transition-colors">Ver
-                    espacios</a>
-            </div>
-
         </div>
     </main>
 
-    <!-- Footer igual al de index.html -->
     <footer class="bg-gray-800 text-white text-center p-4 mt-auto">
         <p>Copyright © 2026 Estacionamiento UCN CQBO</p>
     </footer>
 </body>
 
 </html>
+
+<script>
+    let sectoresData = null;
+
+    // Cargar datos del JSON
+    async function loadSectoresData() {
+        try {
+            const response = await fetch("../assets/data/sectores.json");
+            sectoresData = await response.json();
+        } catch (error) {
+            console.error("Error cargando datos:", error);
+        }
+    }
+
+    // Mostrar vista de sector
+    function showSector(sectorId) {
+        const sector = sectoresData.sectores.find(s => s.id === sectorId);
+        if (!sector) return;
+
+        // Actualizar título
+        document.getElementById("sector-title").textContent = `Mapa: ${sector.nombre}`;
+
+        // Generar grilla de espacios
+        const grid = document.getElementById("espacios-grid");
+        grid.innerHTML = "";
+        sector.espacios.forEach(espacio => {
+            const div = document.createElement("div");
+            div.className = espacio.estado === "disponible" ? "btn-spot-disponible" : "btn-spot-ocupado";
+            div.innerHTML = `<span class="block font-black text-xl drop-shadow-sm">${espacio.id}</span>`;
+            grid.appendChild(div);
+        });
+
+        // Cambiar vistas
+        document.getElementById("sectores-view").classList.add("hidden");
+        document.getElementById("sector-view").classList.remove("hidden");
+    }
+
+    // Volver a vista de sectores
+    function showSectores() {
+        document.getElementById("sector-view").classList.add("hidden");
+        document.getElementById("sectores-view").classList.remove("hidden");
+    }
+
+    // Event listeners
+    document.addEventListener("DOMContentLoaded", async () => {
+        await loadSectoresData();
+
+        // Agregar event listeners a las tarjetas de sector
+        document.querySelectorAll(".sector-card button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                const sectorId = e.target.closest(".sector-card").dataset.sector;
+                showSector(sectorId);
+            });
+        });
+
+        // Botón de volver
+        document.getElementById("back-btn").addEventListener("click", showSectores);
+    });
+</script>

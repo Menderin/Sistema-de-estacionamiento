@@ -1,0 +1,608 @@
+{
+  "sectores": [
+    {
+      "id": "A",
+      "nombre": "Sector Guacolda",
+      "imagen": null,
+      "espacios": [
+        {
+          "id": "A1",
+          "estado": "disponible"
+        },
+        {
+          "id": "A2",
+          "estado": "disponible"
+        },
+        {
+          "id": "A3",
+          "estado": "disponible"
+        },
+        {
+          "id": "A4",
+          "estado": "disponible"
+        },
+        {
+          "id": "A5",
+          "estado": "disponible"
+        },
+        {
+          "id": "A6",
+          "estado": "disponible"
+        },
+        {
+          "id": "A7",
+          "estado": "disponible"
+        },
+        {
+          "id": "A8",
+          "estado": "disponible"
+        },
+        {
+          "id": "A9",
+          "estado": "disponible"
+        },
+        {
+          "id": "A10",
+          "estado": "disponible"
+        },
+        {
+          "id": "A11",
+          "estado": "disponible"
+        },
+        {
+          "id": "A12",
+          "estado": "disponible"
+        },
+        {
+          "id": "A13",
+          "estado": "disponible"
+        },
+        {
+          "id": "A14",
+          "estado": "disponible"
+        },
+        {
+          "id": "A15",
+          "estado": "disponible"
+        },
+        {
+          "id": "A16",
+          "estado": "disponible"
+        },
+        {
+          "id": "A17",
+          "estado": "disponible"
+        },
+        {
+          "id": "A18",
+          "estado": "disponible"
+        },
+        {
+          "id": "A19",
+          "estado": "disponible"
+        },
+        {
+          "id": "A20",
+          "estado": "disponible"
+        },
+        {
+          "id": "A21",
+          "estado": "disponible"
+        },
+        {
+          "id": "A22",
+          "estado": "disponible"
+        },
+        {
+          "id": "A23",
+          "estado": "disponible"
+        },
+        {
+          "id": "A24",
+          "estado": "disponible"
+        },
+        {
+          "id": "A25",
+          "estado": "disponible"
+        },
+        {
+          "id": "A26",
+          "estado": "disponible"
+        },
+        {
+          "id": "A27",
+          "estado": "disponible"
+        },
+        {
+          "id": "A28",
+          "estado": "disponible"
+        },
+        {
+          "id": "A29",
+          "estado": "disponible"
+        },
+        {
+          "id": "A30",
+          "estado": "disponible"
+        },
+        {
+          "id": "A31",
+          "estado": "disponible"
+        },
+        {
+          "id": "A32",
+          "estado": "disponible"
+        },
+        {
+          "id": "A33",
+          "estado": "disponible"
+        },
+        {
+          "id": "A34",
+          "estado": "disponible"
+        },
+        {
+          "id": "A35",
+          "estado": "disponible"
+        },
+        {
+          "id": "A36",
+          "estado": "disponible"
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "nombre": "Sector G5",
+      "imagen": null,
+      "espacios": [
+        {
+          "id": "B1",
+          "estado": "disponible"
+        },
+        {
+          "id": "B2",
+          "estado": "disponible"
+        },
+        {
+          "id": "B3",
+          "estado": "disponible"
+        },
+        {
+          "id": "B4",
+          "estado": "disponible"
+        },
+        {
+          "id": "B5",
+          "estado": "disponible"
+        },
+        {
+          "id": "B6",
+          "estado": "disponible"
+        },
+        {
+          "id": "B7",
+          "estado": "disponible"
+        },
+        {
+          "id": "B8",
+          "estado": "disponible"
+        },
+        {
+          "id": "B9",
+          "estado": "disponible"
+        },
+        {
+          "id": "B10",
+          "estado": "disponible"
+        },
+        {
+          "id": "B11",
+          "estado": "disponible"
+        },
+        {
+          "id": "B12",
+          "estado": "disponible"
+        },
+        {
+          "id": "B13",
+          "estado": "disponible"
+        },
+        {
+          "id": "B14",
+          "estado": "disponible"
+        },
+        {
+          "id": "B15",
+          "estado": "disponible"
+        },
+        {
+          "id": "B16",
+          "estado": "disponible"
+        },
+        {
+          "id": "B17",
+          "estado": "disponible"
+        },
+        {
+          "id": "B18",
+          "estado": "disponible"
+        },
+        {
+          "id": "B19",
+          "estado": "disponible"
+        },
+        {
+          "id": "B20",
+          "estado": "disponible"
+        },
+        {
+          "id": "B21",
+          "estado": "disponible"
+        },
+        {
+          "id": "B22",
+          "estado": "disponible"
+        },
+        {
+          "id": "B23",
+          "estado": "disponible"
+        },
+        {
+          "id": "B24",
+          "estado": "disponible"
+        },
+        {
+          "id": "B25",
+          "estado": "disponible"
+        },
+        {
+          "id": "B26",
+          "estado": "disponible"
+        },
+        {
+          "id": "B27",
+          "estado": "disponible"
+        },
+        {
+          "id": "B28",
+          "estado": "disponible"
+        },
+        {
+          "id": "B29",
+          "estado": "disponible"
+        },
+        {
+          "id": "B30",
+          "estado": "disponible"
+        },
+        {
+          "id": "B31",
+          "estado": "disponible"
+        },
+        {
+          "id": "B32",
+          "estado": "disponible"
+        },
+        {
+          "id": "B33",
+          "estado": "disponible"
+        },
+        {
+          "id": "B34",
+          "estado": "disponible"
+        },
+        {
+          "id": "B35",
+          "estado": "disponible"
+        },
+        {
+          "id": "B36",
+          "estado": "disponible"
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "nombre": "Sector Vicerrectoría",
+      "imagen": null,
+      "espacios": [
+        {
+          "id": "C1",
+          "estado": "disponible"
+        },
+        {
+          "id": "C2",
+          "estado": "disponible"
+        },
+        {
+          "id": "C3",
+          "estado": "disponible"
+        },
+        {
+          "id": "C4",
+          "estado": "disponible"
+        },
+        {
+          "id": "C5",
+          "estado": "disponible"
+        },
+        {
+          "id": "C6",
+          "estado": "disponible"
+        },
+        {
+          "id": "C7",
+          "estado": "disponible"
+        },
+        {
+          "id": "C8",
+          "estado": "disponible"
+        },
+        {
+          "id": "C9",
+          "estado": "disponible"
+        },
+        {
+          "id": "C10",
+          "estado": "disponible"
+        },
+        {
+          "id": "C11",
+          "estado": "disponible"
+        },
+        {
+          "id": "C12",
+          "estado": "disponible"
+        },
+        {
+          "id": "C13",
+          "estado": "disponible"
+        },
+        {
+          "id": "C14",
+          "estado": "disponible"
+        },
+        {
+          "id": "C15",
+          "estado": "disponible"
+        },
+        {
+          "id": "C16",
+          "estado": "disponible"
+        },
+        {
+          "id": "C17",
+          "estado": "disponible"
+        },
+        {
+          "id": "C18",
+          "estado": "disponible"
+        },
+        {
+          "id": "C19",
+          "estado": "disponible"
+        },
+        {
+          "id": "C20",
+          "estado": "disponible"
+        },
+        {
+          "id": "C21",
+          "estado": "disponible"
+        },
+        {
+          "id": "C22",
+          "estado": "disponible"
+        },
+        {
+          "id": "C23",
+          "estado": "disponible"
+        },
+        {
+          "id": "C24",
+          "estado": "disponible"
+        },
+        {
+          "id": "C25",
+          "estado": "disponible"
+        },
+        {
+          "id": "C26",
+          "estado": "disponible"
+        },
+        {
+          "id": "C27",
+          "estado": "disponible"
+        },
+        {
+          "id": "C28",
+          "estado": "disponible"
+        },
+        {
+          "id": "C29",
+          "estado": "disponible"
+        },
+        {
+          "id": "C30",
+          "estado": "disponible"
+        },
+        {
+          "id": "C31",
+          "estado": "disponible"
+        },
+        {
+          "id": "C32",
+          "estado": "disponible"
+        },
+        {
+          "id": "C33",
+          "estado": "disponible"
+        },
+        {
+          "id": "C34",
+          "estado": "disponible"
+        },
+        {
+          "id": "C35",
+          "estado": "disponible"
+        },
+        {
+          "id": "C36",
+          "estado": "disponible"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "nombre": "Sector G6",
+      "imagen": null,
+      "espacios": [
+        {
+          "id": "D1",
+          "estado": "disponible"
+        },
+        {
+          "id": "D2",
+          "estado": "disponible"
+        },
+        {
+          "id": "D3",
+          "estado": "disponible"
+        },
+        {
+          "id": "D4",
+          "estado": "disponible"
+        },
+        {
+          "id": "D5",
+          "estado": "disponible"
+        },
+        {
+          "id": "D6",
+          "estado": "disponible"
+        },
+        {
+          "id": "D7",
+          "estado": "disponible"
+        },
+        {
+          "id": "D8",
+          "estado": "disponible"
+        },
+        {
+          "id": "D9",
+          "estado": "disponible"
+        },
+        {
+          "id": "D10",
+          "estado": "disponible"
+        },
+        {
+          "id": "D11",
+          "estado": "disponible"
+        },
+        {
+          "id": "D12",
+          "estado": "disponible"
+        },
+        {
+          "id": "D13",
+          "estado": "disponible"
+        },
+        {
+          "id": "D14",
+          "estado": "disponible"
+        },
+        {
+          "id": "D15",
+          "estado": "disponible"
+        },
+        {
+          "id": "D16",
+          "estado": "disponible"
+        },
+        {
+          "id": "D17",
+          "estado": "disponible"
+        },
+        {
+          "id": "D18",
+          "estado": "disponible"
+        },
+        {
+          "id": "D19",
+          "estado": "disponible"
+        },
+        {
+          "id": "D20",
+          "estado": "disponible"
+        },
+        {
+          "id": "D21",
+          "estado": "disponible"
+        },
+        {
+          "id": "D22",
+          "estado": "disponible"
+        },
+        {
+          "id": "D23",
+          "estado": "disponible"
+        },
+        {
+          "id": "D24",
+          "estado": "disponible"
+        },
+        {
+          "id": "D25",
+          "estado": "disponible"
+        },
+        {
+          "id": "D26",
+          "estado": "disponible"
+        },
+        {
+          "id": "D27",
+          "estado": "disponible"
+        },
+        {
+          "id": "D28",
+          "estado": "disponible"
+        },
+        {
+          "id": "D29",
+          "estado": "disponible"
+        },
+        {
+          "id": "D30",
+          "estado": "disponible"
+        },
+        {
+          "id": "D31",
+          "estado": "disponible"
+        },
+        {
+          "id": "D32",
+          "estado": "disponible"
+        },
+        {
+          "id": "D33",
+          "estado": "disponible"
+        },
+        {
+          "id": "D34",
+          "estado": "disponible"
+        },
+        {
+          "id": "D35",
+          "estado": "disponible"
+        },
+        {
+          "id": "D36",
+          "estado": "disponible"
+        }
+      ]
+    }
+  ]
+}
