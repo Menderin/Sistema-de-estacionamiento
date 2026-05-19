@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from enum import Enum
 from typing import Optional
 
@@ -13,7 +14,6 @@ class Role(str, Enum):
 
 
 class UserBase(BaseModel):
-    id: Optional[int]
     nombre: str
     email: EmailStr
     role: Role = Role.user
@@ -27,10 +27,13 @@ class UserUpdate(BaseModel):
     nombre: Optional[str] = None
     email: Optional[EmailStr] = None
     role: Optional[Role] = None
+    activo: Optional[bool] = None
 
 
 class UserOut(UserBase):
     id: int
+    activo: bool
+    creado_en: datetime
 
     class Config:
         orm_mode = True
