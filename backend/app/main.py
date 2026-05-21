@@ -1,5 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import sys
+import os
+
+# Asegurar que el entorno reconozca el mÃ³dulo backend
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from database.database import engine
+from database.models import Base
+
+# Crear las tablas en la base de datos si no existen
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="API Estacionamiento UCN CQBO",
