@@ -3,9 +3,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: parkingdb
+      POSTGRES_USER: ucn_admin
+      POSTGRES_PASSWORD: Passw0rd_seguro2025
+      POSTGRES_DB: estacionamiento_ucn
     ports:
       - "5432:5432"
     volumes:
@@ -13,7 +13,7 @@ services:
 
   backend:
     build: ./backend
-    env_file: ./backend/.env
+    env_file: ./backend/database/.env
     ports:
       - "8000:8000"
     depends_on:
