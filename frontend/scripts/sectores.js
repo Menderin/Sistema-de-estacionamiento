@@ -1,9 +1,9 @@
 let sectoresData = null;
 
-// Cargar datos del JSON
+// Cargar datos del API
 async function loadSectoresData() {
     try {
-        const response = await fetch("../assets/data/sectores.json");
+        const response = await fetch("http://localhost:8000/api/sectores");
         sectoresData = await response.json();
     } catch (error) {
         console.error("Error cargando datos:", error);
@@ -12,7 +12,7 @@ async function loadSectoresData() {
 
 // Mostrar vista de sector
 function showSector(sectorId) {
-    const sector = sectoresData.sectores.find(s => s.id === sectorId);
+    const sector = sectoresData.find(s => s.id === sectorId);
     if (!sector) return;
 
     // Actualizar título

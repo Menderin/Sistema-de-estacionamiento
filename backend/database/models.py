@@ -47,3 +47,16 @@ class Espacio(Base):
     actualizado_en = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     sector = relationship("Sector", back_populates="espacios")
+
+class HistorialEspacio(Base):
+    __tablename__ = "historial_espacios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    espacio_id = Column(String(50), ForeignKey("espacios.id", ondelete="CASCADE"), nullable=False, index=True)
+    estado_anterior = Column(SQLEnum(EstadoEnum), nullable=False)
+    estado_nuevo = Column(SQLEnum(EstadoEnum), nullable=False)
+    actualizado_por = Column(String(100), nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    observaciones = Column(String(255), nullable=True)
+
+    espacio = relationship("Espacio")
