@@ -6,21 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/css/output.css">
     <link rel="icon" href="assets/img/favicon.png" type="image/png">
-    <title>Estacionamiento UCN CQBO</title>
+    <title>Estacionamiento UCN Coquimbo</title>
+    <!-- Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body class="bg-gray-100 font-sans text-gray-800 flex flex-col min-h-screen">
     <header class="bg-gray-800 text-white p-4 flex items-center justify-between md:px-8">
         <img src="assets/img/logo_ucn.png" alt="Logo UCN" class="h-12 w-auto">
-        <h1 class="text-2xl md:text-3xl font-bold text-center flex-grow">Estacionamientos UCN CQBO</h1>
+        <h1 class="text-2xl md:text-3xl font-bold text-center flex-grow">Estacionamientos UCN sede Coquimbo</h1>
         <div class="w-12"></div>
     </header>
 
     <nav class="bg-gray-700 text-white p-3">
         <ul class="flex flex-col sm:flex-row justify-center gap-4 text-center">
             <li><a href="#" class="hover:text-blue-300">Inicio</a></li>
-            <li><a href="pages/sectores.html" class="hover:text-blue-300">Sectores</a></li>
-            <li><a href="pages/administracion.html" class="hover:text-blue-300">Administración</a></li>
+            <li id="nav-sectores" class="hidden"><a href="pages/sectores.html" class="hover:text-blue-300">Sectores</a></li>
+            <li id="nav-admin" class="hidden"><a href="pages/administracion.html" class="hover:text-blue-300">Administración</a></li>
             <li><a href="pages/contacto.html" class="hover:text-blue-300">Contacto y ubicación</a></li>
         </ul>
     </nav>
@@ -37,50 +39,74 @@
 
             <div class="relative z-10 text-white max-w-3xl">
                 <h2 class="text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg">Bienvenido al sistema de estacionamiento
-                    de la UCN CQBO</h2>
+                    de la UCN sede Coquimbo</h2>
 
                 <p class="mt-8 text-blue-50 leading-relaxed text-xl drop-shadow">
-                    Creado en la asignatura de Pr. Desarrollo Web Movil, este sistema busca ayudar a la gestión de los
-                    estacionamientos de la UCN CQBO.<br><br>
                     Nuestro objetivo es aprovechar al máximo los espacios y facilitar el acceso de manera
                     rápida y eficaz. ¡Disfruta su uso!
                 </p>
             </div>
         </section>
 
+        <!-- Panel de Login / Perfil -->
         <section
             class="md:w-1/3 bg-blue-50 p-6 md:p-12 flex flex-col justify-center border-t md:border-t-0 md:border-l border-blue-200">
-            <div class="text-center mb-8">
-                <h3 class="font-bold text-3xl text-blue-800">Iniciar sesión</h3>
-                <p class="text-blue-600 mt-2">Ingrese sus credenciales para acceder</p>
+
+            <!-- Vista: No logueado -->
+            <div id="login-panel" class="text-center">
+                <h3 class="font-bold text-3xl text-blue-800 mb-2">Iniciar sesión</h3>
+                <p class="text-blue-600 mb-8">Usa tu cuenta de Google para acceder</p>
+
+                <!-- Botón oficial renderizado por el SDK de Google -->
+                <div class="flex justify-center mb-3">
+                    <div id="google-signin-btn"></div>
+                </div>
+
+                <!-- Botón de respaldo mientras carga el SDK -->
+                <button id="google-fallback-btn"
+                    onclick="triggerGoogleLogin()"
+                    class="w-full flex items-center justify-center gap-3 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-lg shadow-sm transition-colors text-base">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google">
+                    Iniciar sesión con Google
+                </button>
+
+                <p class="mt-6 text-sm text-gray-500">Puedes usar cualquier cuenta de Google.<br>Si tu correo es institucional (@ucn.cl), también es bienvenido.</p>
             </div>
 
-            <form action="#" method="post" class="flex flex-col gap-6 w-full max-w-md mx-auto">
-                <div>
-                    <label for="correo" class="block text-left font-medium mb-2 text-blue-900">Correo
-                        electrónico</label>
-                    <input type="email" id="correo" name="correo" placeholder="ejemplo@ucn.cl"
-                        class="w-full border border-blue-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm transition-all text-lg">
-                </div>
+            <!-- Vista: Logueado -->
+            <div id="profile-panel" class="hidden text-center">
+                <img id="user-avatar" src="" alt="Avatar" class="w-20 h-20 rounded-full mx-auto mb-4 shadow-md border-4 border-blue-300">
+                <h3 class="font-bold text-2xl text-blue-800" id="user-name">-</h3>
+                <p class="text-blue-500 text-sm mt-1" id="user-email">-</p>
+                <span id="user-role-badge" class="inline-block mt-3 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Usuario</span>
 
-                <div>
-                    <label for="contraseña" class="block text-left font-medium mb-2 text-blue-900">Contraseña</label>
-                    <input type="password" id="contraseña" name="contraseña" placeholder="••••••••"
-                        class="w-full border border-blue-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm transition-all text-lg">
-                </div>
+                <!-- Métricas en tiempo real -->
+                <div id="metrics-container"></div>
 
-                <button type="submit"
-                    class="mt-4 bg-blue-600 text-white font-bold py-4 px-4 rounded hover:bg-blue-700 shadow-md shadow-blue-500/40 transition-colors text-lg">
-                    Ingresar al sistema
-                </button>
-            </form>
-        </section>
+                <div class="mt-4 flex flex-col gap-3">
+                    <a id="btn-sectores" href="pages/sectores.html"
+                        class="bg-blue-600 text-white font-bold py-3 px-4 rounded hover:bg-blue-700 shadow transition-colors">
+                        Ver Sectores
+                    </a>
+                    <a id="btn-admin" href="pages/administracion.html"
+                        class="hidden bg-gray-700 text-white font-bold py-3 px-4 rounded hover:bg-gray-800 shadow transition-colors">
+                        Panel de Administración
+                    </a>
+                    <button id="btn-logout"
+                        class="mt-2 text-sm text-red-500 hover:text-red-700 underline transition-colors">
+                        Cerrar sesión
+                    </button>
+                </div>
+            </div>        
+
+      </section>
 
     </main>
 
     <footer class="bg-gray-800 text-white text-center p-4 mt-auto">
-        <p>Copyright © 2026 Estacionamiento UCN CQBO</p>
+        <p>Copyright © 2026 Estacionamiento UCN Coquimbo</p>
     </footer>
+    <script src="scripts/login.js"></script>
 </body>
 
 </html>

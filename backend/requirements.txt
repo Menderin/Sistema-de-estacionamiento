@@ -10,3 +10,5 @@ python-dotenv==1.2.2
 python-multipart==0.0.29
 uvicorn[standard]==0.47.0
 alembic==1.18.4
+google-auth==2.26.2
+requests
