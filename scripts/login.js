@@ -150,6 +150,73 @@ async function handleGoogleCredential(response) {
 }
 
 // ===========================================================
+// CALLBACK LOGIN TRADICIONAL
+// ===========================================================
+
+async function handleTraditionalLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+    const btnSubmit = document.getElementById("login-submit-btn");
+    const errorMsg = document.getElementById("login-error-msg");
+    
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "Ingresando...";
+    errorMsg.classList.add("hidden");
+
+    try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            errorMsg.textContent = err.detail || "Credenciales incorrectas";
+            errorMsg.classList.remove("hidden");
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Ingresar";
+            return;
+        }
+
+        const data = await res.json();
+        const accessToken = data.access_token;
+
+        // Obtener datos del usuario desde el backend usando el JWT
+        const meRes = await fetch(`${API_BASE}/users/me`, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        if (!meRes.ok) throw new Error("No se pudo cargar el perfil");
+        const userData = await meRes.json();
+
+        // Guardar sesión
+        saveSession({
+            access_token: accessToken,
+            nombre: userData.nombre,
+            email: userData.email,
+            role: userData.role,
+            picture: null
+        });
+
+        // Limpiar el formulario
+        document.getElementById("traditional-login-form").reset();
+        
+        renderLoggedIn(getSession());
+
+    } catch (error) {
+        console.error("Error en login tradicional:", error);
+        errorMsg.textContent = "Error de conexión con el servidor";
+        errorMsg.classList.remove("hidden");
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = "Ingresar";
+    }
+}
+
+// ===========================================================
 // LOGOUT
 // ===========================================================
 
@@ -191,6 +258,9 @@ function waitForGoogleSDK() {
 window.addEventListener("load", async () => {
     const btnLogout = document.getElementById("btn-logout");
     if (btnLogout) btnLogout.addEventListener("click", logout);
+
+    const loginForm = document.getElementById("traditional-login-form");
+    if (loginForm) loginForm.addEventListener("submit", handleTraditionalLogin);
 
     const session = getSession();
     if (session && session.access_token) {
@@ -252,34 +322,49 @@ function triggerGoogleLogin() {
 
 async function loadMetrics(token) {
     try {
+        const session = getSession();
+        const roleBadgeText = session.role === "admin" ? `<span data-i18n="role_admin">Administrador</span>` : `<span data-i18n="role_usuario">Usuario</span>`;
+        document.getElementById("user-role-badge").innerHTML = roleBadgeText;
+
+        // Mostrar botón admin si es admin
+        if (session.role === "admin") {
+            const navAdmin = document.getElementById("nav-admin");
+            if (navAdmin) navAdmin.classList.remove("hidden");
+            const btnAdmin = document.getElementById("btn-admin");
+            if (btnAdmin) btnAdmin.classList.remove("hidden");
+        }
+
         const res = await fetch(`${API_BASE}/dashboard/metrics`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) return;
         const data = await res.json();
 
-        const container = document.getElementById("metrics-container");
-        if (!container) return;
+        const metricsDiv = document.getElementById("metrics-container");
+        if (!metricsDiv) return;
 
-        container.innerHTML = `
-            <div class="mt-6 grid grid-cols-2 gap-3 text-center">
-                <div class="bg-white rounded-lg p-3 shadow-sm border border-blue-100">
-                    <p class="text-2xl font-bold text-blue-600">${data.disponibles}</p>
-                    <p class="text-xs text-gray-500 mt-1">Espacios libres</p>
-                </div>
-                <div class="bg-white rounded-lg p-3 shadow-sm border border-blue-100">
-                    <p class="text-2xl font-bold text-blue-600">${data.ocupacion_pct}%</p>
-                    <p class="text-xs text-gray-500 mt-1">Ocupación</p>
-                </div>
+        metricsDiv.innerHTML = `
+            <div class="bg-white dark:bg-gray-700 p-3 rounded shadow-sm border border-blue-100 dark:border-gray-600 text-left mt-4 text-sm transition-colors duration-300">
+                <p class="font-semibold text-gray-700 dark:text-gray-200"><span data-i18n="metric_disponibilidad">Disponibilidad total:</span> <span class="text-blue-600 dark:text-blue-400 font-bold">${data.disponibles} <span data-i18n="metric_espacios">espacios</span></span></p>
+                <p class="font-semibold text-gray-700 dark:text-gray-200"><span data-i18n="metric_ocupacion">Ocupación actual:</span> <span class="text-orange-500 dark:text-orange-400 font-bold">${data.ocupacion_pct}%</span></p>
+                ${data.sector_recomendado ? `<p class="font-semibold text-green-600 dark:text-green-400 mt-1"><span data-i18n="metric_recomendacion">Recomendación: Sector</span> ${data.sector_recomendado}</p>` : ''}
             </div>
-            ${data.sector_recomendado ? `
-            <div class="mt-3 bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                <p class="text-xs text-green-600 font-medium">Sector recomendado</p>
-                <p class="text-lg font-bold text-green-700 mt-1">📍 ${data.sector_recomendado}</p>
-                <p class="text-xs text-green-500">Mayor disponibilidad ahora</p>
-            </div>` : ""}
         `;
+        
+        // Re-apply translations for dynamic content
+        if (typeof applyTranslations === 'function') {
+            applyTranslations();
+        }
     } catch (e) {
         console.warn("No se pudieron cargar las métricas:", e);
     }
-}
+}window.addEventListener("i18n_changed", () => {
+    const session = JSON.parse(localStorage.getItem("ucn_session"));
+    if (session) {
+        const badge = document.getElementById("user-role-badge");
+        if (badge) {
+             badge.innerHTML = session.role === "admin" ? `<span data-i18n="role_admin">Administrador</span>` : `<span data-i18n="role_usuario">Usuario</span>`;
+        }
+        if (typeof applyTranslations === "function") applyTranslations();
+    }
+});

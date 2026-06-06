@@ -60,3 +60,31 @@ def get_dashboard_metrics(
         "sectores": sectores_metrics,
         "sector_recomendado": sector_recomendado
     }
+
+@router.get("/reportes", tags=["Dashboard"])
+def get_reportes(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Retorna los espacios que tienen observaciones o reportes activos."""
+    # Buscar espacios con observaciones no nulas
+    espacios_reportados = db.query(Espacio).filter(Espacio.observaciones.isnot(None)).all()
+    
+    reportes = []
+    for e in espacios_reportados:
+        # Extraer el mensaje (puede o no tener el prefijo "Reporte: ")
+        mensaje = e.observaciones
+        if mensaje.startswith("Reporte: "):
+            mensaje = mensaje.replace("Reporte: ", "", 1)
+            
+        reportes.append({
+            "sector": e.sector.nombre,
+            "espacio": e.id,
+            "mensaje": mensaje,
+            "estado": e.estado,
+            "actualizado_en": e.actualizado_en
+        })
+        
+    # Ordenar por más recientes
+    reportes.sort(key=lambda x: x["actualizado_en"], reverse=True)
+    return reportes

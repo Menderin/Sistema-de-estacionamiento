@@ -88,15 +88,21 @@ def update_espacio_estado(
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
             
         if user.role != RoleEnum.admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Acceso denegado: solo Administradores pueden cambiar estados manualmente"
-            )
+            # Si no es admin, solo puede solicitar un espacio, o reportar un problema (dejando el estado igual o pasándolo a inhabilitado si fuera necesario, pero por ahora solo solicitado y mantener estado)
+            is_requesting = (update_data.estado == EstadoEnum.solicitado)
+            is_reporting = (update_data.estado == espacio.estado and update_data.observaciones is not None)
             
-        actualizado_por = f"admin_{user.id}"
+            if not (is_requesting or is_reporting):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Acceso denegado: los usuarios solo pueden solicitar espacios o reportar problemas"
+                )
+            actualizado_por = f"user_{user.id}"
+        else:
+            actualizado_por = f"admin_{user.id}"
     
-    # Realizar el cambio de estado si es diferente
-    if espacio.estado != update_data.estado:
+    # Realizar el cambio de estado o guardar nuevas observaciones
+    if espacio.estado != update_data.estado or update_data.observaciones:
         # Registrar en Historial de Auditoría (Capa 2)
         historial = HistorialEspacio(
             espacio_id=espacio.id,
@@ -109,8 +115,9 @@ def update_espacio_estado(
         
         espacio.estado = update_data.estado
         espacio.actualizado_por = actualizado_por
-        espacio.observaciones = update_data.observaciones
-        # El campo actualizado_en se actualiza automáticamente por SQLAlchemy (onupdate)
+        if update_data.observaciones:
+            espacio.observaciones = update_data.observaciones
+            
         db.commit()
         db.refresh(espacio)
         

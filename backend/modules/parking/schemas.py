@@ -10,6 +10,8 @@ from pydantic import BaseModel
 class Estado(str, Enum):
     disponible = "disponible"
     ocupado = "ocupado"
+    solicitado = "solicitado"
+    inhabilitado = "inhabilitado"
 
 
 class EspacioBase(BaseModel):

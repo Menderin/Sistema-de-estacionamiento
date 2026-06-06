@@ -13,6 +13,8 @@ class RoleEnum(str, enum.Enum):
 class EstadoEnum(str, enum.Enum):
     disponible = "disponible"
     ocupado = "ocupado"
+    solicitado = "solicitado"
+    inhabilitado = "inhabilitado"
 
 class User(Base):
     __tablename__ = "users"

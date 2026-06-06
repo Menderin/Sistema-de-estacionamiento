@@ -27,10 +27,10 @@ services:
       - "80:80"
     volumes:
       - ./index.html:/usr/share/nginx/html/index.html:ro
-      - ./frontend/assets:/usr/share/nginx/html/assets:ro
-      - ./frontend/data:/usr/share/nginx/html/data:ro
-      - ./frontend/pages:/usr/share/nginx/html/pages:ro
-      - ./frontend/scripts:/usr/share/nginx/html/scripts:ro
+      - ./assets:/usr/share/nginx/html/assets:ro
+      - ./data:/usr/share/nginx/html/data:ro
+      - ./pages:/usr/share/nginx/html/pages:ro
+      - ./scripts:/usr/share/nginx/html/scripts:ro
     depends_on:
       - backend
 

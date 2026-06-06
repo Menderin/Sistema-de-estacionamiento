@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/css/output.css">
+    <link rel="icon" href="../assets/img/favicon.png" type="image/png">
+    <title>Administración - Estacionamiento UCN CQBO</title>
+    <script>
+        function getSession() {
+            try { return JSON.parse(localStorage.getItem("ucn_session")) || null; } catch { return null; }
+        }
+        const session = getSession();
+        if (!session || session.role !== "admin") {
+            window.location.replace("../index.html");
+        }
+    </script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800 font-sans text-gray-800 dark:text-gray-200 flex flex-col min-h-screen transition-colors duration-300">
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white p-4 flex items-center justify-between md:px-8 shadow-lg relative z-20">
+        <img src="../assets/img/logo_ucn.png" alt="Logo UCN" class="h-12 w-auto transition-transform hover:scale-105">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-center flex-grow tracking-wide" data-i18n="header_title">Estacionamientos UCN CQBO</h1>
+        
+        <div class="flex items-center gap-3">
+            <button id="btn-lang" class="text-sm font-bold bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors backdrop-blur-sm shadow-sm" onclick="toggleLang()">EN</button>
+            <button id="btn-theme" class="text-sm font-bold bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors backdrop-blur-sm shadow-sm flex items-center justify-center" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <nav class="bg-gradient-to-r from-blue-800 to-indigo-700 text-white p-3 shadow-md relative z-10">
+        <ul class="flex flex-col sm:flex-row justify-center gap-6 text-center text-sm uppercase tracking-wider font-semibold">
+            <li><a href="../index.html" class="hover:text-blue-200 transition-colors" data-i18n="nav_inicio">Inicio</a></li>
+            <li><a href="sectores.html" class="hover:text-blue-200 transition-colors" data-i18n="nav_sectores">Sectores</a></li>
+            <li><a href="administracion.html" class="text-blue-200 border-b-2 border-blue-200 pb-1" data-i18n="nav_admin">Administración</a></li>
+            <li><a href="contacto.html" class="hover:text-blue-200 transition-colors" data-i18n="nav_contacto">Contacto y ubicación</a></li>
+        </ul>
+    </nav>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto p-4 flex flex-col justify-center">
+        <section class="mb-4 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-2">
+            <div>
+                <h2 class="text-2xl font-bold text-blue-900 dark:text-blue-400" data-i18n="adm_title">Panel de Administración</h2>
+                <p class="text-gray-600 dark:text-gray-400 text-sm" data-i18n="adm_desc">Métricas y estado general en tiempo real</p>
+            </div>
+
+            <button class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold py-1.5 px-4 rounded shadow transition-colors flex items-center gap-2 text-sm">
+                <span data-i18n="adm_btn_update">Actualizar Datos</span>
+                <span>↻</span>
+            </button>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="bg-white dark:bg-gray-800 rounded shadow p-4 border-l-8 border-green-500 transform hover:-translate-y-1 transition-transform">
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide" data-i18n="adm_card_libres">Espacios Libres Totales</p>
+                <div class="flex items-end gap-2 mt-2">
+                    <p id="dash-libres" class="text-4xl font-black text-gray-800 dark:text-gray-100">-</p>
+                    <p id="dash-totales" class="text-sm text-gray-500 dark:text-gray-400 mb-1">/ -</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded shadow p-4 border-l-8 border-orange-500 transform hover:-translate-y-1 transition-transform">
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide" data-i18n="adm_card_uso">Uso Actual (Ocupación)</p>
+                <div class="flex items-end gap-2 mt-2">
+                    <p id="dash-pct" class="text-4xl font-black text-gray-800 dark:text-gray-100">-%</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
+                    <div id="dash-bar" class="bg-orange-500 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded shadow p-4 border-l-8 border-red-500 transform hover:-translate-y-1 transition-transform">
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide" data-i18n="adm_card_llenos">Sectores Llenos</p>
+                <div class="flex flex-col mt-2">
+                    <p class="text-4xl font-black text-gray-800 dark:text-gray-100"><span id="dash-llenos">0</span> <span class="text-lg text-gray-500 dark:text-gray-400 font-normal"> <span data-i18n="adm_de">de</span> <span id="dash-totales-sec">-</span></span></p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 border-b pb-1 border-gray-300 dark:border-gray-600" data-i18n="adm_desglose">Desglose por Sector</h3>
+
+        <div class="bg-white dark:bg-gray-800 rounded shadow overflow-hidden mb-8">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-blue-50 dark:bg-gray-700 text-blue-900 dark:text-blue-300 border-b border-blue-200 dark:border-gray-600">
+                            <th class="p-2.5 font-semibold" data-i18n="adm_th_sector">Sector</th>
+                            <th class="p-2.5 font-semibold text-center" data-i18n="adm_th_capacidad">Capacidad Total</th>
+                            <th class="p-2.5 font-semibold text-center" data-i18n="adm_th_ocupados">Ocupados</th>
+                            <th class="p-2.5 font-semibold text-center" data-i18n="adm_th_disponibles">Disponibles</th>
+                            <th class="p-2.5 font-semibold" data-i18n="adm_th_estado">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dash-tbody" class="text-gray-700 dark:text-gray-300">
+                        <tr>
+                            <td colspan="5" class="p-4 text-center" data-i18n="adm_loading">Cargando datos desde el backend...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 border-b pb-1 border-gray-300 dark:border-gray-600" data-i18n="adm_rep_title">Reportes de Espacios</h3>
+        
+        <div class="bg-white dark:bg-gray-800 rounded shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-400 border-b border-yellow-200 dark:border-yellow-700/50">
+                            <th class="p-2.5 font-semibold" data-i18n="adm_th_sector">Sector</th>
+                            <th class="p-2.5 font-semibold" data-i18n="adm_th_espacio">Espacio</th>
+                            <th class="p-2.5 font-semibold" data-i18n="adm_th_mensaje">Mensaje</th>
+                            <th class="p-2.5 font-semibold text-right" data-i18n="adm_th_acciones">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportes-tbody" class="text-gray-700 dark:text-gray-300">
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-gray-500 dark:text-gray-400" data-i18n="adm_rep_loading">Cargando reportes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 text-center p-4 mt-auto text-sm">
+        <p>Copyright © 2026 Estacionamiento UCN CQBO</p>
+    </footer>
+    <script src="../scripts/i18n.js"></script>
+    <script src="../scripts/administracion.js?v=2"></script>
+</body>
+
+</html>
