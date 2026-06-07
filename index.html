@@ -11,25 +11,26 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
-<body class="bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800 font-sans text-gray-800 dark:text-gray-200 flex flex-col min-h-screen transition-colors duration-300">
-    <header class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white p-4 flex items-center justify-between md:px-8 shadow-lg relative z-20">
-        <img src="assets/img/logo_ucn.png" alt="Logo UCN" class="h-12 w-auto transition-transform hover:scale-105">
-        <h1 class="text-2xl md:text-3xl font-extrabold text-center flex-grow tracking-wide" data-i18n="header_title">Estacionamientos UCN sede Coquimbo</h1>
+<body class="app-body">
+    <header class="app-header">
+        <img src="assets/img/logo_ucn.png" alt="Logo UCN" class="app-logo">
+        <h1 class="app-title" data-i18n="header_title">Estacionamientos UCN sede Coquimbo</h1>
         
-        <div class="flex items-center gap-3">
-            <button id="btn-lang" class="text-sm font-bold bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors backdrop-blur-sm shadow-sm" onclick="toggleLang()">EN</button>
-            <button id="btn-theme" class="text-sm font-bold bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors backdrop-blur-sm shadow-sm flex items-center justify-center" onclick="toggleTheme()">
+        <div class="app-header-actions">
+            <button id="btn-lang" class="app-lang-button" onclick="toggleLang()">EN</button>
+            <button id="btn-theme" class="app-theme-button" onclick="toggleTheme()">
                 <span id="theme-icon">🌙</span>
             </button>
         </div>
     </header>
 
-    <nav class="bg-gradient-to-r from-blue-800 to-indigo-700 text-white p-3 shadow-md relative z-10">
-        <ul class="flex flex-col sm:flex-row justify-center gap-6 text-center text-sm uppercase tracking-wider font-semibold">
-            <li><a href="#" class="text-blue-200 border-b-2 border-blue-200 pb-1" data-i18n="nav_inicio">Inicio</a></li>
-            <li id="nav-sectores" class="hidden"><a href="pages/sectores.html" class="hover:text-blue-200 transition-colors" data-i18n="nav_sectores">Sectores</a></li>
-            <li id="nav-admin" class="hidden"><a href="pages/administracion.html" class="hover:text-blue-200 transition-colors" data-i18n="nav_admin">Administración</a></li>
-            <li><a href="pages/contacto.html" class="hover:text-blue-200 transition-colors" data-i18n="nav_contacto">Contacto y ubicación</a></li>
+    <nav class="app-nav">
+        <ul class="app-nav-list">
+            <li><a href="#" class="app-nav-link-active" data-i18n="nav_inicio">Inicio</a></li>
+            <li id="nav-sectores"><a href="pages/sectores.html" class="app-nav-link" data-i18n="nav_sectores">Sectores</a></li>
+            <li id="nav-admin" class="hidden"><a href="pages/administracion.html" class="app-nav-link" data-i18n="nav_admin">Administración</a></li>
+            <li id="nav-users" class="hidden"><a href="pages/usuarios.html" class="app-nav-link">Usuarios</a></li>
+            <li><a href="pages/contacto.html" class="app-nav-link" data-i18n="nav_contacto">Contacto y ubicación</a></li>
         </ul>
     </nav>
 
@@ -123,9 +124,6 @@
 
     </main>
 
-    <footer class="bg-gray-900 text-gray-400 text-center p-4 mt-auto text-sm">
-        <p>Copyright © 2026 Estacionamiento UCN Coquimbo</p>
-    </footer>
     <script src="scripts/i18n.js"></script>
     <script src="scripts/login.js?v=2"></script>
 </body>

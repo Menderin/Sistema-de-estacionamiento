@@ -3,3 +3,7 @@ assets/css/output.css*
 cambios.md
 test/
 .env
+__pycache__/
+*.pyc
+estacionamiento.db
+backend/**/__pycache__/**

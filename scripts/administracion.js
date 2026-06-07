@@ -1,4 +1,10 @@
-document.addEventListener("DOMContentLoaded", async () => {
+const DASHBOARD_REFRESH_MS = 5000;
+let isDashboardLoading = false;
+
+async function loadDashboardData() {
+    if (isDashboardLoading) return;
+    isDashboardLoading = true;
+
     try {
         const response = await fetch("http://localhost:8000/api/sectores");
         if (!response.ok) {
@@ -167,7 +173,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("dash-tbody").innerHTML = `
             <tr><td colspan="5" class="p-4 text-center text-red-600">Error al conectar con el backend</td></tr>
         `;
+    } finally {
+        isDashboardLoading = false;
     }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadDashboardData();
+
+    const refreshButton = document.getElementById("btn-refresh-dashboard");
+    if (refreshButton) {
+        refreshButton.addEventListener("click", loadDashboardData);
+    }
+
+    setInterval(loadDashboardData, DASHBOARD_REFRESH_MS);
 });
 
 async function resolverReporte(espacioId, estadoActual) {

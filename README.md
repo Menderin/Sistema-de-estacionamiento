@@ -8,44 +8,51 @@ Link al repositorio: https://github.com/Menderin/Sistema-de-estacionamiento
 
 ## Descripcion
 
-Aplicacion front-end que permite visualizar la disponibilidad de espacios de estacionamiento organizados por sectores, acceder a un panel de administracion con metricas de ocupacion y consultar informacion de contacto y ubicacion del campus.
+Aplicacion web para consultar sectores de estacionamiento, revisar disponibilidad de espacios, iniciar sesion, solicitar/reportar espacios y administrar estados desde un panel protegido.
 
-El sistema cubre 4 sectores con 36 espacios cada uno (144 en total):
+El sistema trabaja con 4 sectores y 40 espacios por sector en la carga inicial:
 
-| Sector | Nombre           |
-|--------|------------------|
-| A      | Guacolda         |
-| B      | G5               |
-| C      | Vicerrectoria    |
-| D      | G6               |
+| Sector | Nombre          |
+|--------|-----------------|
+| A      | Guacolda        |
+| B      | G5              |
+| C      | Vicerrectoria   |
+| D      | G6              |
+
+Los datos se guardan en PostgreSQL dentro de Docker. Los sectores, espacios, usuarios y estados se mantienen mientras no se elimine el volumen de la base de datos.
 
 ## Stack tecnologico
 
-- **HTML5** -- Estructura y contenido de las paginas.
-- **Tailwind CSS v3.4** -- Framework de utilidades CSS para el diseno responsive.
-- **Python 3** -- Script auxiliar para generacion automatizada de paginas de sectores.
-
-No utiliza frameworks JavaScript ni backend. Es un proyecto estatico de front-end.
+- **HTML5, CSS y JavaScript** -- Interfaz web estatica.
+- **Tailwind CSS v3.4** -- Utilidades CSS para estilos responsivos.
+- **FastAPI** -- API backend modular.
+- **SQLAlchemy** -- Modelos y acceso a datos.
+- **PostgreSQL 15** -- Base de datos principal en Docker.
+- **Docker Compose** -- Orquestacion de frontend, backend y base de datos.
 
 ## Estructura del repositorio
 
-```
+```text
 Sistema-de-estacionamiento/
 |-- index.html
+|-- docker-compose.yml
 |-- package.json
 |-- tailwind.config.js
-|-- .gitignore
 |
 |-- assets/
 |   |-- css/
-|   |   |-- styles.css
-|   |   +-- output.css
-|   |-- data/
-|   |   +-- sectores.json
 |   +-- img/
-|       |-- logo_ucn.png
-|       |-- favicon.png
-|       +-- estacionamiento_inicio.jpg
+|
+|-- backend/
+|   |-- app/
+|   |-- core/
+|   |-- database/
+|   |-- modules/
+|   |-- utils/
+|   |-- Dockerfile
+|   |-- requirements.txt
+|   |-- create_admin.py
+|   +-- seed_sectores.py
 |
 |-- pages/
 |   |-- sectores.html
@@ -53,67 +60,146 @@ Sistema-de-estacionamiento/
 |   +-- contacto.html
 |
 +-- scripts/
+    |-- login.js
     |-- sectores.js
-    +-- update_sectors.py
+    |-- administracion.js
+    +-- i18n.js
 ```
 
 ## Requisitos previos
 
-- [Node.js](https://nodejs.org/) (v16 o superior)
-- npm (incluido con Node.js)
-- Python 3 (solo si se necesita regenerar las paginas de sectores)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Node.js](https://nodejs.org/) y npm, solo si se compila Tailwind localmente
 
-## Instalacion y ejecucion
+## Ejecucion con Docker
+
+Desde la raiz del proyecto:
 
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/<usuario>/Sistema-de-estacionamiento.git
-cd Sistema-de-estacionamiento
+docker compose up --build
+```
 
-# 2. Instalar dependencias
+En ejecuciones posteriores, si no hay cambios en dependencias o Dockerfile:
+
+```bash
+docker compose up
+```
+
+Servicios disponibles:
+
+| Servicio | URL |
+|----------|-----|
+| Frontend | http://localhost |
+| Backend API | http://localhost:8000 |
+| Documentacion API | http://localhost:8000/docs |
+| PostgreSQL | localhost:5432 |
+
+El backend ejecuta automaticamente al iniciar:
+
+```bash
+python create_admin.py
+python seed_sectores.py
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Esto asegura que exista el usuario administrador y que existan los sectores/espacios base. El seed no reinicia estados de espacios ya existentes.
+
+## Credenciales de desarrollo
+
+Usuario administrador creado por defecto:
+
+```text
+Email: admin@estacionamientoucn.com
+Password: estacionamiento202601
+```
+
+Estas credenciales son para desarrollo academico/local. No deberian usarse tal cual en produccion.
+
+## Persistencia de datos
+
+PostgreSQL usa un volumen Docker:
+
+```yaml
+postgres_data:/var/lib/postgresql/data
+```
+
+Por eso los datos no se pierden al apagar y volver a levantar los contenedores con `docker compose up`.
+
+Los datos se eliminan si se borra el volumen, por ejemplo con:
+
+```bash
+docker compose down -v
+```
+
+## Desarrollo frontend
+
+Para compilar Tailwind localmente:
+
+```bash
 npm install
-
-# 3. Compilar Tailwind CSS en modo watch (desarrollo)
 npm run watch
+```
 
-# 4. En otra terminal, levantar un servidor local
+Tambien se puede servir el frontend estatico fuera de Docker:
+
+```bash
 npx serve .
 ```
 
-El servidor se abrira en `http://localhost:3000`. Es necesario usar un servidor local
-porque las paginas cargan datos con `fetch()`, lo cual no funciona al abrir los archivos
-directamente desde el explorador (`file://`).
+En ese caso el frontend se abre normalmente en `http://localhost:3000`, pero el backend debe seguir activo en `http://localhost:8000` para que funcionen login, sectores, metricas y cambios de estado.
 
-### Scripts disponibles
+## Scripts utiles
 
-| Comando           | Descripcion                                                  |
-|-------------------|--------------------------------------------------------------|
-| `npm run watch`   | Compila Tailwind CSS y observa cambios en tiempo real        |
-| `npm run build`   | Compila Tailwind CSS una sola vez (build de produccion)      |
+| Comando | Descripcion |
+|---------|-------------|
+| `npm run watch` | Compila Tailwind CSS y observa cambios |
+| `npm run build` | Compila Tailwind CSS una vez |
+| `docker compose exec backend python create_admin.py` | Crea o actualiza el admin |
+| `docker compose exec backend python seed_sectores.py` | Crea sectores y espacios faltantes |
+| `docker compose exec backend python simulate_parking.py` | Simula cambios aleatorios de espacios manualmente |
 
-### Regenerar paginas de sectores
+### Simular actividad de estacionamiento
 
-Si se necesita actualizar la estructura HTML de los 4 sectores de forma masiva:
+El servicio `simulator` se levanta junto con Docker Compose y cambia espacios cada 5 segundos para simular actividad en vivo.
+
+Para ver sus logs:
 
 ```bash
-python scripts/update_sectors.py
+docker compose logs -f simulator
 ```
 
-Este script lee un template interno y genera `sector_a.html` a `sector_d.html` con la grilla de 36 espacios cada uno.
+Para detener solo la simulacion:
+
+```bash
+docker compose stop simulator
+```
+
+Para generar movimiento manual adicional:
+
+```bash
+docker compose exec backend python simulate_parking.py
+```
+
+Tambien se puede indicar cantidad de cambios y espera entre cada cambio:
+
+```bash
+docker compose exec backend python simulate_parking.py --iterations 50 --delay 1
+```
 
 ## Paginas del sistema
 
-- **Inicio** (`index.html`) -- Landing page con formulario de login. Diseno en dos columnas: imagen de fondo con overlay a la izquierda y formulario a la derecha.
-- **Sectores** (`pages/sectores.html`) -- Vista con tarjetas interactivas para cada sector. Grid responsivo que adapta de 1 a 4 columnas.
-- **Sector individual** Mapa con grilla de espacios de estacionamiento. Cada espacio indica disponibilidad con codigo de color (verde/rojo).
-- **Administracion** (`pages/administracion.html`) -- Dashboard con KPIs: espacios libres, porcentaje de ocupacion y sectores llenos. Incluye tabla de desglose por sector.
-- **Contacto** (`pages/contacto.html`) -- Informacion de contacto en dos columnas con mapa de Google Maps embebido.
+- **Inicio** (`index.html`) -- Login tradicional y Google Sign-In.
+- **Sectores** (`pages/sectores.html`) -- Vista de sectores y grilla de espacios.
+- **Administracion** (`pages/administracion.html`) -- Panel administrativo con metricas y gestion.
+- **Usuarios** (`pages/usuarios.html`) -- Gestion de cuentas, roles y estado de acceso para administradores.
+- **Contacto** (`pages/contacto.html`) -- Informacion de contacto y ubicacion.
 
 ## Notas
 
-- El archivo `output.css` se genera automaticamente y no se versiona (esta en `.gitignore`). Siempre debe compilarse localmente con `npm run watch` o `npm run build`.
-- La carpeta `node_modules/` tampoco se versiona.
-- Los datos de ocupacion mostrados en el panel de administracion son estaticos (hardcoded). No hay conexion a backend ni base de datos.
+- El archivo `output.css` se genera automaticamente y no se versiona.
+- La carpeta `node_modules/` no se versiona.
+- El frontend consume la API en `http://localhost:8000/api`.
+- Si el login admin falla, verificar que el backend haya arrancado correctamente y que `create_admin.py` se haya ejecutado dentro del contenedor.
 
 ## Licencia
 

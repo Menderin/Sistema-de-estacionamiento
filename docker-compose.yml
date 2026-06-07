@@ -21,6 +21,16 @@ services:
       db:
         condition: service_healthy   
 
+  simulator:
+    build: ./backend
+    env_file: ./backend/database/.env
+    command: ["python", "-u", "simulate_parking.py", "--forever", "--delay", "5", "--initial-delay", "10"]
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
   frontend:
     image: nginx:alpine
     ports:

@@ -4,16 +4,18 @@ import os
 # Set up the path to import database and models
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from database.database import SessionLocal
+from database.database import Base, SessionLocal, engine
 from database.models import Sector, Espacio, EstadoEnum
 
 def seed_sectores():
+    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     
     sectores_data = [
-        {"id": "B", "nombre": "Sector G5", "num_espacios": 5},
-        {"id": "C", "nombre": "Sector Vicerrectoría", "num_espacios": 5},
-        {"id": "D", "nombre": "Sector G6", "num_espacios": 5}
+        {"id": "A", "nombre": "Sector Guacolda", "num_espacios": 40},
+        {"id": "B", "nombre": "Sector G5", "num_espacios": 40},
+        {"id": "C", "nombre": "Sector Vicerrectoría", "num_espacios": 40},
+        {"id": "D", "nombre": "Sector G6", "num_espacios": 40}
     ]
     
     for s_data in sectores_data:

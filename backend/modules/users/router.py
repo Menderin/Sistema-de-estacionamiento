@@ -76,6 +76,11 @@ def update_user(
     if user_data.role is not None:
         user.role = user_data.role
     if user_data.activo is not None:
+        if user.id == current_user.id and not user_data.activo:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No puedes desactivar tu propia cuenta de administrador"
+            )
         user.activo = user_data.activo
         
     db.commit()

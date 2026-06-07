@@ -1,6 +1,6 @@
 const translations = {
     es: {
-        header_title: "Estacionamientos UCN CQBO",
+        header_title: "Estacionamientos UCN sede Coquimbo",
         nav_inicio: "Inicio",
         nav_sectores: "Sectores",
         nav_admin: "Administración",
@@ -79,7 +79,7 @@ const translations = {
         con_horario_val: "Lunes a Viernes: 8:00 a 18:00<br>Sábado: 8:00 a 14:00"
     },
     en: {
-        header_title: "UCN CQBO Parking",
+        header_title: "UCN Coquimbo Parking",
         nav_inicio: "Home",
         nav_sectores: "Sectors",
         nav_admin: "Administration",

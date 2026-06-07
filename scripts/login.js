@@ -61,29 +61,29 @@ function renderLoggedIn(session) {
     const badge = document.getElementById("user-role-badge");
     const btnAdmin = document.getElementById("btn-admin");
     const navAdmin = document.getElementById("nav-admin");
-    const navSectores = document.getElementById("nav-sectores");
+    const navUsers = document.getElementById("nav-users");
 
     if (session.role === "admin") {
         badge.textContent = "Administrador";
         badge.className = "inline-block mt-3 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700";
         btnAdmin.classList.remove("hidden");
         navAdmin.classList.remove("hidden");
+        navUsers.classList.remove("hidden");
     } else {
         badge.textContent = "Usuario";
         badge.className = "inline-block mt-3 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700";
         btnAdmin.classList.add("hidden");
         navAdmin.classList.add("hidden");
+        navUsers.classList.add("hidden");
     }
-
-    navSectores.classList.remove("hidden");
 }
 
 function renderLoggedOut() {
     document.getElementById("login-panel").classList.remove("hidden");
     document.getElementById("profile-panel").classList.add("hidden");
 
-    document.getElementById("nav-sectores").classList.add("hidden");
     document.getElementById("nav-admin").classList.add("hidden");
+    document.getElementById("nav-users").classList.add("hidden");
 }
 
 // ===========================================================
@@ -330,6 +330,8 @@ async function loadMetrics(token) {
         if (session.role === "admin") {
             const navAdmin = document.getElementById("nav-admin");
             if (navAdmin) navAdmin.classList.remove("hidden");
+            const navUsers = document.getElementById("nav-users");
+            if (navUsers) navUsers.classList.remove("hidden");
             const btnAdmin = document.getElementById("btn-admin");
             if (btnAdmin) btnAdmin.classList.remove("hidden");
         }
