@@ -1,9 +1,11 @@
+import { API_BASE } from "./config.js";
+
 let sectoresData = null;
 
 // Cargar datos del API
 async function loadSectoresData() {
     try {
-        const response = await fetch("http://localhost:8000/api/sectores");
+        const response = await fetch(`${API_BASE}/sectores`);
         sectoresData = await response.json();
     } catch (error) {
         console.error("Error cargando datos:", error);
@@ -156,7 +158,7 @@ async function updateEspacioState(espacioId, estado, observaciones = null) {
         const payload = { estado: estado };
         if (observaciones) payload.observaciones = observaciones;
 
-        const res = await fetch(`http://localhost:8000/api/espacios/${espacioId}/estado`, {
+        const res = await fetch(`${API_BASE}/espacios/${espacioId}/estado`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

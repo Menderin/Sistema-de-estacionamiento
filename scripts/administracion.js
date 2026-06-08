@@ -1,3 +1,5 @@
+import { API_BASE } from "./config.js";
+
 const DASHBOARD_REFRESH_MS = 5000;
 let isDashboardLoading = false;
 
@@ -6,7 +8,7 @@ async function loadDashboardData() {
     isDashboardLoading = true;
 
     try {
-        const response = await fetch("http://localhost:8000/api/sectores");
+        const response = await fetch(`${API_BASE}/sectores`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -73,7 +75,7 @@ async function loadDashboardData() {
         const token = session ? session.access_token : null;
 
         if (token) {
-            const repResponse = await fetch("http://localhost:8000/api/dashboard/reportes", {
+            const repResponse = await fetch(`${API_BASE}/dashboard/reportes`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (repResponse.ok) {
@@ -196,7 +198,7 @@ async function resolverReporte(espacioId, estadoActual) {
     try {
         const payload = { estado: estadoActual, observaciones: "" };
 
-        const res = await fetch(`http://localhost:8000/api/espacios/${espacioId}/estado`, {
+        const res = await fetch(`${API_BASE}/espacios/${espacioId}/estado`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
