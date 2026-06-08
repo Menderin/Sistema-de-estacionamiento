@@ -157,6 +157,7 @@ En ese caso el frontend se abre normalmente en `http://localhost:3000`, pero el 
 | `docker compose exec backend python create_admin.py` | Crea o actualiza el admin |
 | `docker compose exec backend python seed_sectores.py` | Crea sectores y espacios faltantes |
 | `docker compose exec backend python simulate_parking.py` | Simula cambios aleatorios de espacios manualmente |
+| `docker compose exec backend python test_api.py` | Ejecuta pruebas sobre los endpoints de la API |
 
 ### Simular actividad de estacionamiento
 
@@ -179,6 +180,18 @@ Para generar movimiento manual adicional:
 ```bash
 docker compose exec backend python simulate_parking.py
 ```
+
+### Probar endpoints de la API
+
+Con Docker Compose activo, se puede ejecutar una prueba de los endpoints principales:
+
+```bash
+docker compose stop simulator
+docker compose exec backend python test_api.py
+docker compose start simulator
+```
+
+El simulador se pausa durante la prueba para evitar cambios aleatorios mientras se validan estados de espacios.
 
 Tambien se puede indicar cantidad de cambios y espera entre cada cambio:
 

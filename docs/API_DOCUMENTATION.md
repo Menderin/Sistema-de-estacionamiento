@@ -9,7 +9,7 @@ Esta documentación expande y complementa la documentación autogenerada de Fast
 Para facilitar el entorno de pruebas y desarrollo, el sistema incluye por defecto un usuario administrador inicial con las siguientes credenciales:
 
 - **Email**: `admin@estacionamientoucn.com`
-- **Password**: `estacionamiento20261`
+- **Password**: `estacionamiento202601`
 
 Este usuario posee el rol `admin` y tiene permisos totales para administrar usuarios, sectores, espacios, y realizar cambios manuales de estado.
 
@@ -47,7 +47,7 @@ Permite a los usuarios y administradores autenticarse para obtener un token JWT 
 ```json
 {
   "email": "admin@estacionamientoucn.com",
-  "password": "estacionamiento20261"
+  "password": "estacionamiento202601"
 }
 ```
 
