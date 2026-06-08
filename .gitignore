@@ -2,4 +2,8 @@ node_modules/
 assets/css/output.css*
 cambios.md
 test/
-backend/database/.env
+.env
+__pycache__/
+*.pyc
+estacionamiento.db
+backend/**/__pycache__/**

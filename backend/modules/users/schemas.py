@@ -35,5 +35,4 @@ class UserOut(UserBase):
     activo: bool
     creado_en: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}

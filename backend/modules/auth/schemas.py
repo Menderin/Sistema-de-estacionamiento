@@ -17,3 +17,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     sub: Optional[str] = None
+
+class GoogleLoginRequest(BaseModel):
+    token: str

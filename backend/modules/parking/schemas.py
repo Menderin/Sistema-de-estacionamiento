@@ -10,6 +10,8 @@ from pydantic import BaseModel
 class Estado(str, Enum):
     disponible = "disponible"
     ocupado = "ocupado"
+    solicitado = "solicitado"
+    inhabilitado = "inhabilitado"
 
 
 class EspacioBase(BaseModel):
@@ -35,8 +37,7 @@ class EspacioOut(EspacioBase):
     actualizado_por: str  # 'sistema' | 'admin_<id>' | email
     actualizado_en: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
 class SectorBase(BaseModel):
@@ -59,5 +60,4 @@ class SectorOut(SectorBase):
     actualizado_en: datetime
     espacios: List[EspacioOut] = []
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
