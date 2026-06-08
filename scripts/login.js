@@ -2,7 +2,7 @@
 // CONFIGURACIÓN — Se carga dinámicamente desde el backend
 // ===========================================================
 let GOOGLE_CLIENT_ID = null;
-const API_BASE = "http://localhost:8000/api";
+import { API_BASE } from "./config.js";
 
 async function loadConfig() {
     const res = await fetch(`${API_BASE}/dashboard/config`);
