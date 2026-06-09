@@ -7,3 +7,4 @@ __pycache__/
 *.pyc
 estacionamiento.db
 backend/**/__pycache__/**
+.idea/
