@@ -8,3 +8,5 @@ __pycache__/
 estacionamiento.db
 backend/**/__pycache__/**
 .idea/
+.idea/caches/
+.idea/caches/deviceStreaming.xml
