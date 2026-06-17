@@ -80,14 +80,22 @@ function showSector(sectorId) {
                 toggleFavorite(espacio.id);
             });
 
-            // Asignar eventos a los botones generados
             dropdown.querySelectorAll(".btn-action").forEach(btn => {
-                btn.addEventListener("click", (e) => {
+                btn.addEventListener("click", async (e) => {
                     e.stopPropagation(); // Evitar cerrar el menu inmediatamente al clickear
                     const action = btn.dataset.action;
                     if (action === "reportar") {
                         const obs = prompt("Describe el problema encontrado en el espacio:");
-                        if (obs) updateEspacioState(espacio.id, espacio.estado, `Reporte: ${obs}`);
+                        if (obs) {
+                            // Preguntar si quiere tomar una foto (Capacitor)
+                            let foto = null;
+                            if (window.Capacitor) {
+                                if (confirm("¿Quieres adjuntar una foto del problema?")) {
+                                    foto = await takeReportPhoto();
+                                }
+                            }
+                            updateEspacioState(espacio.id, espacio.estado, `Reporte: ${obs}`, foto);
+                        }
                     } else {
                         updateEspacioState(espacio.id, action);
                     }
@@ -214,13 +222,14 @@ document.addEventListener("click", () => {
 });
 
 // Actualizar estado API
-async function updateEspacioState(espacioId, estado, observaciones = null) {
+async function updateEspacioState(espacioId, estado, observaciones = null, foto = null) {
     const session = JSON.parse(localStorage.getItem("ucn_session"));
     if (!session) return;
 
     try {
         const payload = { estado: estado };
         if (observaciones) payload.observaciones = observaciones;
+        if (foto) payload.foto_base64 = foto;
 
         const res = await fetch(`${API_BASE}/espacios/${espacioId}/estado`, {
             method: "PUT",
@@ -247,6 +256,23 @@ async function updateEspacioState(espacioId, estado, observaciones = null) {
     } catch (error) {
         console.error("Error al actualizar:", error);
         alert("Error de conexión con el servidor");
+    }
+}
+
+// Función para tomar foto con la cámara (Capacitor)
+async function takeReportPhoto() {
+    try {
+        const Camera = window.Capacitor.Plugins.Camera;
+        const image = await Camera.getPhoto({
+            quality: 60,
+            allowEditing: false,
+            resultType: "base64",
+            source: "camera"
+        });
+        return `data:image/${image.format};base64,${image.base64String}`;
+    } catch (e) {
+        console.warn("Cámara cancelada o no disponible.");
+        return null;
     }
 }
 

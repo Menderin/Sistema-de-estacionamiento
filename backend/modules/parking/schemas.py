@@ -31,11 +31,16 @@ class EspacioUpdateEstado(BaseModel):
     """Schema para cambiar estado de espacio (solo admins/sistema)."""
     estado: Estado
     observaciones: Optional[str] = None
+    foto_base64: Optional[str] = None
 
 
-class EspacioOut(EspacioBase):
+class EspacioOut(BaseModel):
+    id: str
+    estado: Estado
     actualizado_por: str  # 'sistema' | 'admin_<id>' | email
     actualizado_en: datetime
+    observaciones: Optional[str] = None
+    foto_base64: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

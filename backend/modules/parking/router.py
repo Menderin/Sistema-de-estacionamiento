@@ -102,14 +102,15 @@ def update_espacio_estado(
             actualizado_por = f"admin_{user.id}"
     
     # Realizar el cambio de estado o guardar nuevas observaciones
-    if espacio.estado != update_data.estado or update_data.observaciones:
+    if espacio.estado != update_data.estado or update_data.observaciones or update_data.foto_base64:
         # Registrar en Historial de Auditoría (Capa 2)
         historial = HistorialEspacio(
             espacio_id=espacio.id,
             estado_anterior=estado_anterior,
             estado_nuevo=update_data.estado,
             actualizado_por=actualizado_por,
-            observaciones=update_data.observaciones
+            observaciones=update_data.observaciones,
+            foto_base64=update_data.foto_base64
         )
         db.add(historial)
         
@@ -117,7 +118,9 @@ def update_espacio_estado(
         espacio.actualizado_por = actualizado_por
         if update_data.observaciones:
             espacio.observaciones = update_data.observaciones
-            
+        if update_data.foto_base64:
+            espacio.foto_base64 = update_data.foto_base64
+
         db.commit()
         db.refresh(espacio)
         
