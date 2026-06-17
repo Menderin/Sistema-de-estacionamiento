@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="assets/css/output.css">
     <link rel="icon" href="assets/img/favicon.png" type="image/png">
     <title>Estacionamiento UCN Coquimbo</title>
-    <!-- Google Identity Services SDK -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google Identity Services SDK - CARGA FORZADA SIN DEFER -->
+    <script src="https://accounts.google.com/gsi/client"></script>
 </head>
 
 <body class="app-body">
@@ -78,12 +78,12 @@
                     <hr class="w-1/4 border-gray-300">
                 </div>
 
-                <!-- Botón oficial renderizado por el SDK de Google -->
+                <!-- Botón oficial (A veces falla en Android) -->
                 <div class="flex justify-center mb-3">
                     <div id="google-signin-btn"></div>
                 </div>
 
-                <!-- Botón de respaldo mientras carga el SDK -->
+                <!-- Botón de respaldo (Mejor compatibilidad en Android) -->
                 <button id="google-fallback-btn"
                     onclick="triggerGoogleLogin()"
                     class="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold py-3 px-4 rounded-lg shadow-sm transition-all transform hover:-translate-y-0.5 text-base" data-i18n="google_btn">

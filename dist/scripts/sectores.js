@@ -40,12 +40,10 @@ function showSector(sectorId) {
         else if (espacio.estado === "solicitado") colorClass = "btn-spot-solicitado";
         else if (espacio.estado === "inhabilitado") colorClass = "btn-spot-inhabilitado";
 
-        spotBtn.className = `${colorClass} w-full z-20 relative`;
+        spotBtn.className = `${colorClass} w-full z-20 relative flex items-center justify-center min-h-[60px]`;
         spotBtn.innerHTML = `
             <span class="block font-black text-xl drop-shadow-sm pointer-events-none">${espacio.id}</span>
-            <button class="absolute top-0 right-0 p-1 text-xs btn-favorite ${favoriteSpace === espacio.id ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-500 transition-colors" data-id="${espacio.id}">
-                ${favoriteSpace === espacio.id ? '★' : '☆'}
-            </button>
+            ${favoriteSpace === espacio.id ? '<span class="absolute top-1 right-1 text-xs text-yellow-400 drop-shadow-sm">★</span>' : ''}
         `;
         spotBtn.dataset.espacioId = espacio.id;
         spotBtn.dataset.estado = espacio.estado;
@@ -55,21 +53,33 @@ function showSector(sectorId) {
         dropdown.className = "espacio-dropdown absolute top-full mt-2 w-full min-w-[140px] left-1/2 -translate-x-1/2 bg-white rounded-lg shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 pointer-events-none flex flex-col border border-gray-200 divide-y divide-gray-100";
 
         if (session) {
+            const isFav = favoriteSpace === espacio.id;
+            const favText = isFav ? "Quitar Favorito" : "Marcar Favorito";
+            const favIcon = isFav ? "☆" : "★";
+
             if (session && session.role === "admin") {
                 dropdown.innerHTML = `
-                    <button class="w-full text-center px-2 py-3 text-sm font-bold text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors btn-action dark:text-red-400 dark:hover:bg-red-900/30" data-action="ocupado" data-i18n="btn_ocupar">Ocupar</button>
-                    <button class="w-full text-center px-2 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-gray-700 transition-colors btn-action dark:text-gray-300 dark:hover:bg-gray-700" data-action="inhabilitado" data-i18n="btn_inhabilitar">Inhabilitar</button>
-                    <button class="w-full text-center px-2 py-3 text-sm font-bold text-green-600 hover:bg-green-50 hover:text-green-700 transition-colors btn-action dark:text-green-400 dark:hover:bg-green-900/30" data-action="disponible" data-i18n="btn_liberar">Liberar</button>
+                    <button class="w-full text-center px-2 py-3 text-sm font-bold text-yellow-600 hover:bg-yellow-50 btn-fav-toggle" data-id="${espacio.id}">${favIcon} ${favText}</button>
+                    <button class="w-full text-center px-2 py-3 text-sm font-bold text-red-600 hover:bg-red-50 btn-action" data-action="ocupado">Ocupar</button>
+                    <button class="w-full text-center px-2 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 btn-action" data-action="inhabilitado">Inhabilitar</button>
+                    <button class="w-full text-center px-2 py-3 text-sm font-bold text-green-600 hover:bg-green-50 btn-action" data-action="disponible">Liberar</button>
                 `;
             } else {
                 let html = "";
+                html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-yellow-600 hover:bg-yellow-50 btn-fav-toggle" data-id="${espacio.id}">${favIcon} ${favText}</button>`;
                 if (espacio.estado === "disponible") {
-                    html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors btn-action dark:text-blue-400 dark:hover:bg-blue-900/30" data-action="solicitado" data-i18n="btn_solicitar">Solicitar</button>`;
+                    html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 btn-action" data-action="solicitado">Solicitar</button>`;
                 }
-                html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 transition-colors btn-action dark:text-yellow-400 dark:hover:bg-yellow-900/30" data-action="reportar" data-i18n="btn_reportar">Reportar</button>`;
+                html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-orange-600 hover:bg-orange-50 btn-action" data-action="reportar">Reportar</button>`;
                 dropdown.innerHTML = html;
             }
-            
+
+            // Evento para el botón de favorito dentro del menú
+            dropdown.querySelector(".btn-fav-toggle").addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleFavorite(espacio.id);
+            });
+
             // Asignar eventos a los botones generados
             dropdown.querySelectorAll(".btn-action").forEach(btn => {
                 btn.addEventListener("click", (e) => {
@@ -128,31 +138,21 @@ function showSector(sectorId) {
     document.getElementById("sectores-view").classList.add("hidden");
     document.getElementById("sector-view").classList.remove("hidden");
 
-    // Asignar eventos a los botones de favoritos
-    document.querySelectorAll(".btn-favorite").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const id = btn.dataset.id;
-            if (favoriteSpace === id) {
-                favoriteSpace = null;
-                localStorage.removeItem("ucn_favorite_space");
-                btn.textContent = "☆";
-                btn.classList.replace("text-yellow-400", "text-gray-300");
-            } else {
-                favoriteSpace = id;
-                localStorage.setItem("ucn_favorite_space", id);
-                // Resetear otros visualmente si existieran (aunque solo guardamos uno)
-                document.querySelectorAll(".btn-favorite").forEach(b => {
-                    b.textContent = "☆";
-                    b.classList.replace("text-yellow-400", "text-gray-300");
-                });
-                btn.textContent = "★";
-                btn.classList.replace("text-gray-300", "text-yellow-400");
-            }
-        });
-    });
-
     if (typeof applyTranslations === "function") applyTranslations();
+}
+
+// Nueva función centralizada para favoritos
+function toggleFavorite(id) {
+    if (favoriteSpace === id) {
+        favoriteSpace = null;
+        localStorage.removeItem("ucn_favorite_space");
+    } else {
+        favoriteSpace = id;
+        localStorage.setItem("ucn_favorite_space", id);
+    }
+    // Refrescar la vista actual para actualizar las estrellitas y el menú
+    const sectorPrefix = id.charAt(0);
+    showSector(sectorPrefix);
 }
 
 // Función para monitorear el favorito

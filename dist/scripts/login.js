@@ -1,13 +1,19 @@
 // ===========================================================
 // CONFIGURACIÓN — Se carga dinámicamente desde el backend
 // ===========================================================
-let GOOGLE_CLIENT_ID = null;
+let GOOGLE_CLIENT_ID = "634865181116-vsc30987f66a0ia0j92ia6p53b7mke8o.apps.googleusercontent.com"; // TU ID DE CLIENTE REAL
 import { API_BASE } from "./config.js";
 
 async function loadConfig() {
-    const res = await fetch(`${API_BASE}/dashboard/config`);
-    const config = await res.json();
-    GOOGLE_CLIENT_ID = config.google_client_id;
+    try {
+        const res = await fetch(`${API_BASE}/dashboard/config`);
+        if (res.ok) {
+            const config = await res.json();
+            if (config.google_client_id) GOOGLE_CLIENT_ID = config.google_client_id;
+        }
+    } catch (e) {
+        console.warn("Usando Google Client ID por defecto.");
+    }
 }
 
 // ===========================================================
@@ -310,13 +316,26 @@ function initGoogleSignIn() {
 }
 
 // Función para el botón de respaldo: abre el popup de Google manualmente
-function triggerGoogleLogin() {
-    if (typeof google !== "undefined" && google.accounts && GOOGLE_CLIENT_ID) {
-        google.accounts.id.prompt();
-    } else if (!GOOGLE_CLIENT_ID) {
-        alert("No se pudo conectar con el servidor. Verifica que el backend esté activo.");
+// La hacemos global para que el HTML la encuentre
+window.triggerGoogleLogin = function() {
+    console.log("--- DIAGNÓSTICO GOOGLE ---");
+    console.log("window.google existe:", typeof window.google !== "undefined");
+    if (window.google) console.log("google.accounts existe:", typeof window.google.accounts !== "undefined");
+
+    if (typeof google !== "undefined" && google.accounts) {
+        if (GOOGLE_CLIENT_ID) {
+            google.accounts.id.prompt((notification) => {
+                if (notification.isNotDisplayed()) {
+                    console.warn("El prompt no se mostró:", notification.getNotDisplayedReason());
+                    alert("No se pudo abrir el acceso de Google. Intenta usar el login tradicional.");
+                }
+            });
+        } else {
+            alert("Cargando configuración del servidor... Reintenta en un segundo.");
+            loadConfig();
+        }
     } else {
-        alert("El servicio de Google aún está cargando. Intenta en un momento.");
+        alert("El servicio de Google no está disponible en este momento.");
     }
 }
 
