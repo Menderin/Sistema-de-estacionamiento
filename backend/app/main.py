@@ -24,13 +24,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configuración de CORS para permitir peticiones desde el frontend estático
+# Configuración de CORS para permitir peticiones desde el frontend estático y App Móvil
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción cambiar por la URL específica del frontend (ej: http://localhost:3000)
+    allow_origins=["*"],  # PERMITIR TODO PARA ANDROID
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Registrar los routers del sistema bajo el prefijo /api

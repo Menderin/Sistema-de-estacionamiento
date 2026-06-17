@@ -241,8 +241,9 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
         });
 
         if (!res.ok) {
-            const err = await res.json();
-            alert("Error: " + (err.detail || "No se pudo actualizar"));
+            const errorText = await res.text();
+            console.error(`[ERROR API] Status: ${res.status}, Body: ${errorText}`);
+            alert(`Error del servidor (${res.status}): No se pudo guardar el reporte.`);
             return;
         }
 
@@ -264,10 +265,11 @@ async function takeReportPhoto() {
     try {
         const Camera = window.Capacitor.Plugins.Camera;
         const image = await Camera.getPhoto({
-            quality: 60,
+            quality: 30, // Calidad ultra-baja para asegurar que pase el límite de tamaño
             allowEditing: false,
             resultType: "base64",
-            source: "camera"
+            source: "camera",
+            width: 600 // Ancho máximo de 600px
         });
         return `data:image/${image.format};base64,${image.base64String}`;
     } catch (e) {
