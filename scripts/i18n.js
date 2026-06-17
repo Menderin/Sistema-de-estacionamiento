@@ -166,14 +166,21 @@ function applyTranslations() {
     document.querySelectorAll("[data-i18n]").forEach(el => {
         const key = el.getAttribute("data-i18n");
         if (translations[currentLang][key]) {
-            el.innerHTML = translations[currentLang][key];
+            // Solo actualizar si el contenido es distinto para evitar bucles infinitos
+            if (el.innerHTML !== translations[currentLang][key]) {
+                el.innerHTML = translations[currentLang][key];
+            }
         }
     });
     const btn = document.getElementById("btn-lang");
     if (btn) btn.textContent = currentLang === "es" ? "EN" : "ES";
 
-    // Disparar evento para que otros scripts que generan HTML dinámicamente sepan que cambió
-    window.dispatchEvent(new Event("i18n_changed"));
+    // Disparar evento de forma segura
+    if (!window._i18n_dispatching) {
+        window._i18n_dispatching = true;
+        window.dispatchEvent(new Event("i18n_changed"));
+        setTimeout(() => window._i18n_dispatching = false, 100);
+    }
 }
 
 function toggleLang() {

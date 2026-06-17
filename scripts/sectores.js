@@ -80,6 +80,7 @@ function showSector(sectorId) {
                 toggleFavorite(espacio.id);
             });
 
+            // Asignar eventos a los botones generados
             dropdown.querySelectorAll(".btn-action").forEach(btn => {
                 btn.addEventListener("click", async (e) => {
                     e.stopPropagation(); // Evitar cerrar el menu inmediatamente al clickear
@@ -87,14 +88,20 @@ function showSector(sectorId) {
                     if (action === "reportar") {
                         const obs = prompt("Describe el problema encontrado en el espacio:");
                         if (obs) {
-                            // Preguntar si quiere tomar una foto (Capacitor)
                             let foto = null;
                             if (window.Capacitor) {
                                 if (confirm("¿Quieres adjuntar una foto del problema?")) {
+                                    console.log("Abriendo cámara...");
                                     foto = await takeReportPhoto();
+                                    if (foto) {
+                                        console.log("Foto recibida en el reporte principal.");
+                                    } else {
+                                        console.warn("No se recibió foto de la cámara.");
+                                    }
                                 }
                             }
-                            updateEspacioState(espacio.id, espacio.estado, `Reporte: ${obs}`, foto);
+                            // ENVIAR REPORTE (Esperamos a que la foto esté cargada)
+                            await updateEspacioState(espacio.id, espacio.estado, `Reporte: ${obs}`, foto);
                         }
                     } else {
                         updateEspacioState(espacio.id, action);
@@ -149,53 +156,6 @@ function showSector(sectorId) {
     if (typeof applyTranslations === "function") applyTranslations();
 }
 
-// Nueva función centralizada para favoritos
-function toggleFavorite(id) {
-    if (favoriteSpace === id) {
-        favoriteSpace = null;
-        localStorage.removeItem("ucn_favorite_space");
-    } else {
-        favoriteSpace = id;
-        localStorage.setItem("ucn_favorite_space", id);
-    }
-    // Refrescar la vista actual para actualizar las estrellitas y el menú
-    const sectorPrefix = id.charAt(0);
-    showSector(sectorPrefix);
-}
-
-// Función para monitorear el favorito
-async function checkFavoriteStatus() {
-    if (!favoriteSpace) return;
-
-    try {
-        const response = await fetch(`${API_BASE}/sectores`);
-        const data = await response.json();
-
-        // Buscar el espacio favorito en todos los sectores
-        let foundSpace = null;
-        data.forEach(sector => {
-            const match = sector.espacios.find(e => e.id === favoriteSpace);
-            if (match) foundSpace = match;
-        });
-
-        if (foundSpace) {
-            const lastStatus = localStorage.getItem("ucn_fav_last_status");
-            if (lastStatus === "ocupado" && foundSpace.estado === "disponible") {
-                sendLocalNotification(
-                    "¡Espacio Disponible!",
-                    `Tu lugar favorito ${foundSpace.id} se ha desocupado.`
-                );
-            }
-            localStorage.setItem("ucn_fav_last_status", foundSpace.estado);
-        }
-    } catch (e) {
-        console.warn("Error monitoreando favorito:", e);
-    }
-}
-
-// Iniciar monitoreo cada 10 segundos
-setInterval(checkFavoriteStatus, 10000);
-
 // Volver a vista de sectores
 function showSectores() {
     document.getElementById("sector-view").classList.add("hidden");
@@ -233,6 +193,7 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
     try {
         // --- SOLUCIÓN NATIVA PARA EVITAR CORS EN ANDROID ---
         if (window.Capacitor && window.Capacitor.Plugins.CapacitorHttp) {
+            console.log("Enviando petición HTTP Nativa...");
             const Http = window.Capacitor.Plugins.CapacitorHttp;
             const options = {
                 url: `${API_BASE}/espacios/${espacioId}/estado`,
@@ -244,6 +205,7 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
             };
 
             const response = await Http.put(options);
+            console.log("Respuesta Nativa:", response);
 
             if (response.status >= 200 && response.status < 300) {
                 closeAllDropdowns();
@@ -287,20 +249,45 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
     }
 }
 
+// Nueva función centralizada para favoritos
+function toggleFavorite(id) {
+    if (favoriteSpace === id) {
+        favoriteSpace = null;
+        localStorage.removeItem("ucn_favorite_space");
+    } else {
+        favoriteSpace = id;
+        localStorage.setItem("ucn_favorite_space", id);
+    }
+    // Refrescar la vista actual para actualizar las estrellitas y el menú
+    const sectorPrefix = id.charAt(0);
+    showSector(sectorPrefix);
+}
+
 // Función para tomar foto con la cámara (Capacitor)
 async function takeReportPhoto() {
     try {
         const Camera = window.Capacitor.Plugins.Camera;
+
+        // FORZAR PETICIÓN DE PERMISOS
+        const perm = await Camera.requestPermissions();
+        if (perm.camera !== 'granted') {
+            alert("Necesitas dar permiso a la cámara para tomar fotos.");
+            return null;
+        }
+
         const image = await Camera.getPhoto({
-            quality: 30, // Calidad ultra-baja para asegurar que pase el límite de tamaño
+            quality: 30,
             allowEditing: false,
             resultType: "base64",
             source: "camera",
-            width: 600 // Ancho máximo de 600px
+            width: 600
         });
-        return `data:image/${image.format};base64,${image.base64String}`;
+
+        const fullBase64 = `data:image/${image.format};base64,${image.base64String}`;
+        console.log("¡FOTO CAPTURADA EXITOSAMENTE!");
+        return fullBase64;
     } catch (e) {
-        console.warn("Cámara cancelada o no disponible.");
+        console.warn("Cámara cancelada o no disponible:", e);
         return null;
     }
 }
@@ -320,3 +307,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Botón de volver
     document.getElementById("back-btn").addEventListener("click", showSectores);
 });
+
+// Función para monitorear el favorito
+async function checkFavoriteStatus() {
+    if (!favoriteSpace) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/sectores`);
+        const data = await response.json();
+
+        // Buscar el espacio favorito en todos los sectores
+        let foundSpace = null;
+        data.forEach(sector => {
+            const match = sector.espacios.find(e => e.id === favoriteSpace);
+            if (match) foundSpace = match;
+        });
+
+        if (foundSpace) {
+            const lastStatus = localStorage.getItem("ucn_fav_last_status");
+            if (lastStatus === "ocupado" && foundSpace.estado === "disponible") {
+                sendLocalNotification(
+                    "¡Espacio Disponible!",
+                    `Tu lugar favorito ${foundSpace.id} se ha desocupado.`
+                );
+            }
+            localStorage.setItem("ucn_fav_last_status", foundSpace.estado);
+        }
+    } catch (e) {
+        console.warn("Error monitoreando favorito:", e);
+    }
+}
+
+// Iniciar monitoreo cada 10 segundos
+setInterval(checkFavoriteStatus, 10000);

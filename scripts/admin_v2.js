@@ -106,7 +106,7 @@ async function loadDashboardData() {
                             <td class="p-2.5 font-bold text-blue-600 dark:text-blue-400">${rep.espacio}</td>
                             <td class="p-2.5 text-gray-700 dark:text-gray-300 font-medium">
                                 ${rep.mensaje}
-                                ${rep.foto_base64 ? `<br><button class="mt-2 bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs btn-ver-foto" data-foto="${rep.foto_base64}">📷 Ver Foto</button>` : ''}
+                                ${rep.foto_base64 ? `<br><button class="mt-2 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold btn-ver-foto" data-foto="${rep.foto_base64}">Ver Foto</button>` : ''}
                             </td>
                             <td class="p-2.5 text-right align-top relative w-48">
                                 <div class="flex flex-col items-end w-full">
