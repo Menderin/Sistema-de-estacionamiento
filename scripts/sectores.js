@@ -226,11 +226,38 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
     const session = JSON.parse(localStorage.getItem("ucn_session"));
     if (!session) return;
 
-    try {
-        const payload = { estado: estado };
-        if (observaciones) payload.observaciones = observaciones;
-        if (foto) payload.foto_base64 = foto;
+    const payload = { estado: estado };
+    if (observaciones) payload.observaciones = observaciones;
+    if (foto) payload.foto_base64 = foto;
 
+    try {
+        // --- SOLUCIÓN NATIVA PARA EVITAR CORS EN ANDROID ---
+        if (window.Capacitor && window.Capacitor.Plugins.CapacitorHttp) {
+            const Http = window.Capacitor.Plugins.CapacitorHttp;
+            const options = {
+                url: `${API_BASE}/espacios/${espacioId}/estado`,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session.access_token}`
+                },
+                data: payload
+            };
+
+            const response = await Http.put(options);
+
+            if (response.status >= 200 && response.status < 300) {
+                closeAllDropdowns();
+                await loadSectoresData();
+                showSector(espacioId.charAt(0));
+                return;
+            } else {
+                console.error(`[ERROR NATIVO] Status: ${response.status}`, response.data);
+                alert(`Error del servidor (${response.status}): No se pudo guardar.`);
+                return;
+            }
+        }
+
+        // --- FALLBACK FETCH (Para PC/Navegador) ---
         const res = await fetch(`${API_BASE}/espacios/${espacioId}/estado`, {
             method: "PUT",
             headers: {

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum as SQLEnum, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -45,7 +45,7 @@ class Espacio(Base):
     sector_id = Column(String(50), ForeignKey("sectores.id"), nullable=False, index=True)
     estado = Column(SQLEnum(EstadoEnum), default=EstadoEnum.disponible, nullable=False)
     observaciones = Column(String(255), nullable=True)
-    foto_base64 = Column(String, nullable=True)  # Nuevo campo para fotos de reportes
+    foto_base64 = Column(Text, nullable=True)
     actualizado_por = Column(String(100), nullable=False, default="sistema")
     actualizado_en = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -61,5 +61,6 @@ class HistorialEspacio(Base):
     actualizado_por = Column(String(100), nullable=False)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     observaciones = Column(String(255), nullable=True)
+    foto_base64 = Column(Text, nullable=True)
 
     espacio = relationship("Espacio")
