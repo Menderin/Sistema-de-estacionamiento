@@ -37,6 +37,8 @@ const translations = {
         btn_ocupar: "Ocupar",
         btn_inhabilitar: "Inhabilitar",
         btn_liberar: "Liberar",
+        btn_como_llegar: "Cómo llegar",
+        btn_buscar_optimo: "Buscar Estacionamiento Óptimo (GPS)",
         alert_login: "Debes iniciar sesión para realizar acciones sobre un espacio.",
         
         // Administracion page
@@ -116,6 +118,8 @@ const translations = {
         btn_ocupar: "Occupy",
         btn_inhabilitar: "Disable",
         btn_liberar: "Release",
+        btn_como_llegar: "Directions",
+        btn_buscar_optimo: "Find Optimal Parking (GPS)",
         alert_login: "You must sign in to perform actions on a parking space.",
         
         // Admin page
