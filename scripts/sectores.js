@@ -8,20 +8,16 @@ let mapMarkers = {};
 let routingControl = null;
 let userMarker = null;
 
-const SECTOR_COORDS = {
-    'A': [-29.9658, -71.3482],
-    'B': [-29.9648, -71.3490],
-    'C': [-29.9642, -71.3485],
-    'D': [-29.9662, -71.3492]
-};
-
 // Cargar datos del API
 async function loadSectoresData() {
     try {
+        console.log("Intentando conectar al API en:", `${API_BASE}/sectores`);
         const response = await fetch(`${API_BASE}/sectores`);
+        if (!response.ok) throw new Error(`Status: ${response.status}`);
         sectoresData = await response.json();
+        console.log("Datos de sectores recibidos exitosamente:", sectoresData);
     } catch (error) {
-        console.error("Error cargando datos:", error);
+        console.error("ERROR CRÍTICO cargando datos del backend:", error);
     }
 }
 
@@ -39,6 +35,9 @@ function showSector(sectorId) {
 
     // Actualizar título
     document.getElementById("sector-title").textContent = `Mapa: ${sector.nombre}`;
+
+    // Ordenar los espacios numéricamente (A1, A2, A3... A10)
+    sector.espacios.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
 
     // Generar grilla de espacios
     const grid = document.getElementById("espacios-grid");
@@ -186,7 +185,7 @@ function showSectores() {
 
     // Resetear vista del mapa
     if (mapInstance) {
-        mapInstance.flyTo([-29.9653, -71.3488], 17);
+        mapInstance.flyTo([-29.9637, -71.3485], 17);
         mapInstance.closePopup();
 
         // Limpiar ruta al volver
@@ -369,9 +368,10 @@ async function calculateRoute(sectorId) {
 
         const position = await getPosition();
         const userCoords = [position.coords.latitude, position.coords.longitude];
-        const destCoords = SECTOR_COORDS[sectorId];
 
-        if (!destCoords) return;
+        const sector = sectoresData.find(s => s.id === sectorId);
+        if (!sector || !sector.lat) return;
+        const destCoords = [sector.lat, sector.lng];
 
         // Limpiar ruta previa
         if (routingControl) {
@@ -417,48 +417,53 @@ async function calculateRoute(sectorId) {
 }
 
 // Inicializar Mapa con Marcadores de Sectores
-function initMap() {
+async function initMap() {
     const mapElement = document.getElementById('map-sectores');
     if (!mapElement) return;
 
-    // Coordenadas centrales UCN Coquimbo
-    const ucnCoords = [-29.9653, -71.3488];
+    // Si aún no hay datos, esperar a que carguen
+    if (!sectoresData) {
+        await loadSectoresData();
+    }
 
-    // Crear el mapa
-    mapInstance = L.map('map-sectores').setView(ucnCoords, 17);
+    // Coordenadas centrales UCN Coquimbo (Centrado en estacionamientos)
+    const ucnCoords = [-29.9637, -71.3485];
 
-    // Capa de mapa vectorial (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(mapInstance);
+    // Crear el mapa si no existe
+    if (!mapInstance) {
+        mapInstance = L.map('map-sectores').setView(ucnCoords, 17);
 
-    // Definir los sectores y sus ubicaciones aproximadas
-    const sectores = [
-        { id: 'A', nombre: 'Sector Guacolda', coords: [-29.9658, -71.3482] },
-        { id: 'B', nombre: 'Sector G5', coords: [-29.9648, -71.3490] },
-        { id: 'C', nombre: 'Sector Vicerrectoría', coords: [-29.9642, -71.3485] },
-        { id: 'D', nombre: 'Sector G6', coords: [-29.9662, -71.3492] }
-    ];
+        // Capa de mapa vectorial (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(mapInstance);
+    }
 
-    // Añadir marcadores
-    sectores.forEach(s => {
-        const marker = L.marker(s.coords).addTo(mapInstance);
-        marker.bindPopup(`<b>Sector ${s.id}</b><br>${s.nombre}`);
+    // Añadir marcadores desde la base de datos (sectoresData)
+    if (sectoresData) {
+        console.log("Cargando marcadores:", sectoresData);
+        sectoresData.forEach(s => {
+            if (s.lat && s.lng) {
+                const marker = L.marker([s.lat, s.lng]).addTo(mapInstance);
+                marker.bindPopup(`<b>Sector ${s.id}</b><br>${s.nombre}`);
 
-        mapMarkers[s.id] = marker; // Guardar referencia
+                mapMarkers[s.id] = marker; // Guardar referencia
 
-        // Hacer que al hacer clic en el marcador también se abra el sector en la app
-        marker.on('click', () => {
-            showSector(s.id);
+                marker.on('click', () => {
+                    showSector(s.id);
+                });
+            } else {
+                console.warn(`Sector ${s.id} no tiene coordenadas válidas.`);
+            }
         });
-    });
+    }
 }
 
 // Inicializar al cargar el script
 document.addEventListener("DOMContentLoaded", async () => {
     await loadSectoresData();
-    initMap(); // Inicializar el mapa
-    initOrientationCheck(); // Nueva función de rotación
+    await initMap(); // Ahora con await
+    initOrientationCheck();
 
     // Agregar event listeners a las tarjetas de sector
     document.querySelectorAll(".sector-card button").forEach(button => {
