@@ -292,9 +292,46 @@ async function takeReportPhoto() {
     }
 }
 
+// Inicializar Mapa con Marcadores de Sectores
+function initMap() {
+    const mapElement = document.getElementById('map-sectores');
+    if (!mapElement) return;
+
+    // Coordenadas centrales UCN Coquimbo
+    const ucnCoords = [-29.9653, -71.3488];
+
+    // Crear el mapa
+    const map = L.map('map-sectores').setView(ucnCoords, 17);
+
+    // Capa de mapa vectorial (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Definir los sectores y sus ubicaciones aproximadas
+    const sectores = [
+        { id: 'A', nombre: 'Sector Guacolda', coords: [-29.9658, -71.3482] },
+        { id: 'B', nombre: 'Sector G5', coords: [-29.9648, -71.3490] },
+        { id: 'C', nombre: 'Sector Vicerrectoría', coords: [-29.9642, -71.3485] },
+        { id: 'D', nombre: 'Sector G6', coords: [-29.9662, -71.3492] }
+    ];
+
+    // Añadir marcadores
+    sectores.forEach(s => {
+        const marker = L.marker(s.coords).addTo(map);
+        marker.bindPopup(`<b>Sector ${s.id}</b><br>${s.nombre}`);
+
+        // Hacer que al hacer clic en el marcador también se abra el sector en la app
+        marker.on('click', () => {
+            showSector(s.id);
+        });
+    });
+}
+
 // Event listeners
 document.addEventListener("DOMContentLoaded", async () => {
     await loadSectoresData();
+    initMap(); // Inicializar el mapa
 
     // Agregar event listeners a las tarjetas de sector
     document.querySelectorAll(".sector-card button").forEach(button => {
