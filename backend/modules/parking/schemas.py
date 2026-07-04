@@ -48,8 +48,6 @@ class EspacioOut(BaseModel):
 class SectorBase(BaseModel):
     id: str
     nombre: str
-    lat: Optional[float] = None
-    lng: Optional[float] = None
     imagen: Optional[str] = None
 
 
