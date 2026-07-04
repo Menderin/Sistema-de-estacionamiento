@@ -149,21 +149,35 @@ def main():
     assert_status("GET /api/dashboard/reportes", status, 200)
 
     request("DELETE", f"/api/sectores/{test_sector_id}", token=token)
-    status, _ = request(
+    status, created_sector = request(
         "POST",
         "/api/sectores",
         token=token,
-        body={"id": test_sector_id, "nombre": "Sector Test API", "imagen": None},
+        body={
+            "id": test_sector_id,
+            "nombre": "Sector Test API",
+            "imagen": None,
+            "latitud": -29.96,
+            "longitud": -71.35,
+        },
     )
     assert_status("POST /api/sectores", status, 201)
+    if created_sector.get("latitud") != -29.96 or created_sector.get("longitud") != -71.35:
+        raise ApiTestError("POST /api/sectores: expected latitude and longitude to be persisted")
 
-    status, _ = request(
+    status, updated_sector = request(
         "PUT",
         f"/api/sectores/{test_sector_id}",
         token=token,
-        body={"nombre": "Sector Test API Actualizado"},
+        body={
+            "nombre": "Sector Test API Actualizado",
+            "latitud": -29.97,
+            "longitud": -71.36,
+        },
     )
     assert_status("PUT /api/sectores/{sector_id}", status, 200)
+    if updated_sector.get("latitud") != -29.97 or updated_sector.get("longitud") != -71.36:
+        raise ApiTestError("PUT /api/sectores/{sector_id}: expected latitude and longitude to be updated")
 
     status, _ = request(
         "POST",
