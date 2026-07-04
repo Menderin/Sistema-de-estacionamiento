@@ -4,8 +4,9 @@ export const API_BASE = "https://sistema-de-estacionamiento-production-7de7.up.r
 
 // Coordenadas aproximadas de los sectores en UCN Coquimbo
 export const SECTOR_COORDINATES = {
-    "A": { lat: -29.9645, lng: -71.3485, nombre: "Guacolda" },
-    "B": { lat: -29.9652, lng: -71.3492, nombre: "G5" },
-    "C": { lat: -29.9638, lng: -71.3478, nombre: "Vicerrectoría" },
-    "D": { lat: -29.9660, lng: -71.3501, nombre: "G6" }
+    "A": { lat: -29.96282203969842, lng: -71.34783321868933, nombre: "Guacolda" },
+    "B": { lat: -29.96405771015899, lng: -71.34887826146702, nombre: "G5" },
+    "C": { lat: -29.964616401036675, lng: -71.34786670686655, nombre: "Vicerrectoría" },
+    "D": { lat: -29.963940470532304, lng: -71.34800765390582, nombre: "G6" }
+    
 };

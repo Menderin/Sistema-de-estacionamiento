@@ -102,19 +102,30 @@ def update_espacio_estado(
             is_reporting = (update_data.estado == espacio.estado and update_data.observaciones is not None)
             
             if is_requesting:
-                # RESTRICCIÓN: Solo una reserva a la vez
+                # LÓGICA DE INTERCAMBIO: Si ya tiene una reserva, liberarla automáticamente
                 active_reservation = db.query(Espacio).filter(
                     Espacio.actualizado_por == actualizado_por,
                     Espacio.estado == EstadoEnum.solicitado
                 ).first()
 
-                if active_reservation:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"Ya tienes una reserva activa en el espacio {active_reservation.id}. Debes liberarla para solicitar otro."
+                if active_reservation and active_reservation.id != espacio.id:
+                    # Registrar la liberación automática en el historial
+                    historial_liberacion = HistorialEspacio(
+                        espacio_id=active_reservation.id,
+                        estado_anterior=EstadoEnum.solicitado,
+                        estado_nuevo=EstadoEnum.disponible,
+                        actualizado_por="sistema_auto_liberacion",
+                        observaciones=f"Liberación automática por nueva reserva en {espacio.id}"
                     )
+                    db.add(historial_liberacion)
 
-                if espacio.estado != EstadoEnum.disponible:
+                    # Liberar el espacio anterior
+                    active_reservation.estado = EstadoEnum.disponible
+                    active_reservation.actualizado_por = "sistema"
+
+                    print(f"Auto-liberando espacio {active_reservation.id} para usuario {user.id}")
+
+                if espacio.estado != EstadoEnum.disponible and espacio.estado != EstadoEnum.solicitado:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Este espacio no está disponible para reserva."

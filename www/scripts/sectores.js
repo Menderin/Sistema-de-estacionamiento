@@ -246,6 +246,8 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
                 // Si se solicita, mostrar la ruta
                 if (estado === "solicitado") {
                     calculateRoute(espacioId.charAt(0));
+                    // Pequeño aviso de cortesía
+                    console.log("Nueva reserva activa. Cualquier reserva previa ha sido liberada automáticamente.");
                 }
 
                 closeAllDropdowns();
