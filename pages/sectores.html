@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../assets/css/output.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
     <link rel="icon" href="../assets/img/favicon.png" type="image/png">
     <title>Sectores - Estacionamiento UCN CQBO</title>
 </head>
@@ -42,19 +41,6 @@
 
         <!-- Vista de Sectores -->
         <div id="sectores-view">
-            <div class="mb-8 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 shadow-sm dark:border-gray-700 dark:from-gray-800 dark:to-gray-900">
-                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <h3 class="text-lg font-bold text-blue-900 dark:text-blue-300">Ubicación de los sectores</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Selecciona un sector para ver su ubicación y dirigirte con Google Maps.</p>
-                    </div>
-                    <a id="map-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Abrir en Google Maps</a>
-                </div>
-                <div id="sector-map" class="relative mt-4 h-64 overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
-                    <div id="sector-map-label" class="absolute left-3 top-3 z-10 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-blue-700 shadow-sm backdrop-blur">Ruta hacia el sector</div>
-                    <div id="sector-map-view" class="h-full w-full"></div>
-                </div>
-            </div>
             <!-- Contenedor Cards (Grid Responsivo) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="sector-card" data-sector="A">
@@ -98,19 +84,7 @@
                 </div>
 
                 <!-- Contenedor del Mapa -->
-                <div class="w-full flex-grow relative bg-gray-200 dark:bg-gray-900 flex flex-col items-center justify-center p-6 md:p-12 transition-all duration-500" id="mapa-contenedor">
-                    <div class="mb-6 w-full max-w-6xl rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                            <div>
-                                <h3 id="detail-sector-map-label" class="text-lg font-bold text-blue-900 dark:text-blue-300">Ruta hacia el sector</h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-300">El mapa se actualizará con la ubicación del sector seleccionado.</p>
-                            </div>
-                            <a id="detail-map-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Ver ruta</a>
-                        </div>
-                        <div class="relative mt-4 h-64 overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
-                            <div id="detail-sector-map-view" class="h-full w-full"></div>
-                        </div>
-                    </div>
+                <div class="w-full flex-grow relative bg-gray-200 dark:bg-gray-900 flex items-center justify-center p-6 md:p-12 transition-all duration-500" id="mapa-contenedor">
                     <!-- Grilla de Espacios -->
                     <div id="espacios-grid" class="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-9 gap-4 md:gap-5 transition-all duration-300 ease-in-out" style="padding-bottom: 0px;">
                         <!-- Espacios se cargarán dinámicamente -->
@@ -134,9 +108,8 @@
             } catch(e) {}
         });
     </script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="../scripts/i18n.js"></script>
-    <script type="module" src="../scripts/sectores.js?v=7"></script>
+    <script type="module" src="../scripts/sectores.js?v=6"></script>
 </body>
 
 </html>

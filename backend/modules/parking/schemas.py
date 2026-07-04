@@ -49,32 +49,15 @@ class SectorBase(BaseModel):
     id: str
     nombre: str
     imagen: Optional[str] = None
-    latitud: Optional[float] = None
-    longitud: Optional[float] = None
 
 
 class SectorCreate(SectorBase):
-    latitud: float
-    longitud: float
-    espacios: Optional[List[EspacioCreate]] = None
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, core_schema, handler):
-        schema = handler(core_schema)
-        schema.setdefault("example", {
-            "id": "E",
-            "nombre": "Sector Nuevo",
-            "latitud": -29.9645,
-            "longitud": -71.3485
-        })
-        return schema
+    espacios: Optional[List[EspacioCreate]] = []
 
 
 class SectorUpdate(BaseModel):
     nombre: Optional[str] = None
     imagen: Optional[str] = None
-    latitud: Optional[float] = None
-    longitud: Optional[float] = None
 
 
 class SectorOut(SectorBase):

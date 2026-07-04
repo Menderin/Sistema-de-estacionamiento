@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum as SQLEnum, Text, Float
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum as SQLEnum, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -33,8 +33,6 @@ class Sector(Base):
     id = Column(String(50), primary_key=True, index=True)
     nombre = Column(String(100), nullable=False)
     imagen = Column(String(255), nullable=True)
-    latitud = Column(Float, nullable=True)
-    longitud = Column(Float, nullable=True)
     creado_en = Column(DateTime(timezone=True), server_default=func.now())
     actualizado_en = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

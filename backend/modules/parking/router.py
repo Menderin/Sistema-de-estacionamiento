@@ -141,19 +141,11 @@ def create_sector(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Ya existe un sector con el identificador '{sector_data.id}'"
         )
-
-    if sector_data.latitud is None or sector_data.longitud is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Se requieren coordenadas válidas de latitud y longitud para crear un sector"
-        )
         
     new_sector = Sector(
         id=sector_data.id,
         nombre=sector_data.nombre,
-        imagen=sector_data.imagen,
-        latitud=sector_data.latitud,
-        longitud=sector_data.longitud
+        imagen=sector_data.imagen
     )
     db.add(new_sector)
     db.commit()
@@ -176,16 +168,6 @@ def update_sector(
         sector.nombre = sector_data.nombre
     if sector_data.imagen is not None:
         sector.imagen = sector_data.imagen
-    if sector_data.latitud is not None:
-        sector.latitud = sector_data.latitud
-    if sector_data.longitud is not None:
-        sector.longitud = sector_data.longitud
-
-    if sector.latitud is None or sector.longitud is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Se requieren coordenadas válidas de latitud y longitud para actualizar un sector"
-        )
         
     db.commit()
     db.refresh(sector)

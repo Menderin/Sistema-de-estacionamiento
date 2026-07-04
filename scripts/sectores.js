@@ -3,219 +3,6 @@ import { sendLocalNotification } from "./notifications.js";
 
 let sectoresData = null;
 let favoriteSpace = localStorage.getItem("ucn_favorite_space"); // Cargar favorito guardado
-let activeSector = null;
-let userPosition = null;
-let locationWatchId = null;
-let routeLine = null;
-let userMarker = null;
-let sectorMarkers = [];
-let maps = {};
-let followLocation = true;
-
-function initMap(containerId) {
-    if (!window.L) return null;
-
-    const container = document.getElementById(containerId);
-    if (!container) return null;
-
-    if (!maps[containerId]) {
-        const map = window.L.map(containerId, {
-            zoomControl: true,
-            attributionControl: true
-        }).setView([-29.95, -71.34], 13);
-
-        window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 19,
-            attribution: "&copy; OpenStreetMap contributors"
-        }).addTo(map);
-
-        maps[containerId] = map;
-    }
-
-    return maps[containerId];
-}
-
-function refreshMaps() {
-    Object.values(maps).forEach((map) => {
-        if (map && typeof map.invalidateSize === "function") {
-            setTimeout(() => map.invalidateSize(), 100);
-        }
-    });
-}
-
-function clearMapOverlays() {
-    if (routeLine) {
-        routeLine.remove();
-        routeLine = null;
-    }
-    sectorMarkers.forEach((marker) => marker.remove());
-    sectorMarkers = [];
-    if (userMarker) {
-        userMarker.remove();
-        userMarker = null;
-    }
-}
-
-function placeSectorMarker(map, sector) {
-    if (!sector || sector.latitud == null || sector.longitud == null) return;
-
-    const marker = window.L.marker([sector.latitud, sector.longitud], {
-        title: sector.nombre
-    }).addTo(map);
-    marker.bindPopup(`<strong>${sector.nombre}</strong>`);
-    sectorMarkers.push(marker);
-}
-
-function placeUserMarker(map, position) {
-    if (!position) return;
-
-    const latlng = window.L.latLng(position.lat, position.lng);
-    userMarker = window.L.marker(latlng, {
-        icon: window.L.divIcon({
-            className: "",
-            html: '<div style="background:#2563eb;border:2px solid white;border-radius:999px;width:14px;height:14px;box-shadow:0 0 8px rgba(0,0,0,0.3);"></div>'
-        })
-    }).addTo(map);
-    userMarker.bindPopup("Tu ubicación");
-}
-
-async function drawRoute(map, sector) {
-    if (!sector || sector.latitud == null || sector.longitud == null || !userPosition) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${userPosition.lng},${userPosition.lat};${sector.longitud},${sector.latitud}?overview=full&geometries=geojson`);
-        const data = await response.json();
-        if (!data.routes || !data.routes.length) return;
-
-        const coords = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
-        routeLine = window.L.polyline(coords, {
-            color: "#2563eb",
-            weight: 5,
-            opacity: 0.8
-        }).addTo(map);
-
-        const bounds = window.L.latLngBounds([
-            [userPosition.lat, userPosition.lng],
-            [sector.latitud, sector.longitud]
-        ]);
-        map.fitBounds(bounds.pad(0.2));
-    } catch (error) {
-        console.error("No se pudo dibujar la ruta:", error);
-    }
-}
-
-async function updateSectorMap(sector) {
-    activeSector = sector;
-
-    const mapLink = document.getElementById("map-link");
-    const detailMapLink = document.getElementById("detail-map-link");
-    const mapLabel = document.getElementById("sector-map-label");
-    const detailMapLabel = document.getElementById("detail-sector-map-label");
-
-    const applyMapState = (link, label, currentSector) => {
-        if (!link || !label) return;
-
-        if (currentSector && currentSector.latitud != null && currentSector.longitud != null) {
-            const destination = `${currentSector.latitud},${currentSector.longitud}`;
-            const origin = userPosition ? `${userPosition.lat},${userPosition.lng}` : "";
-            link.href = origin
-                ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`
-                : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving`;
-            link.classList.remove("hidden");
-            link.textContent = `Ver ruta a ${currentSector.nombre}`;
-            label.textContent = `Ruta hacia ${currentSector.nombre}`;
-        } else {
-            link.href = "#";
-            link.classList.add("hidden");
-            label.textContent = "Selecciona un sector";
-        }
-    };
-
-    applyMapState(mapLink, mapLabel, sector);
-    applyMapState(detailMapLink, detailMapLabel, sector);
-
-    const generalMap = initMap("sector-map-view");
-    const detailMap = initMap("detail-sector-map-view");
-
-    if (!generalMap || !detailMap) return;
-
-    clearMapOverlays();
-
-    if (sector && sector.latitud != null && sector.longitud != null) {
-        placeSectorMarker(generalMap, sector);
-        placeSectorMarker(detailMap, sector);
-
-        if (userPosition) {
-            placeUserMarker(generalMap, userPosition);
-            placeUserMarker(detailMap, userPosition);
-            await drawRoute(generalMap, sector);
-            await drawRoute(detailMap, sector);
-        }
-
-        const destLatLng = window.L.latLng(sector.latitud, sector.longitud);
-        generalMap.setView(destLatLng, 15);
-        detailMap.setView(destLatLng, 15);
-
-        if (userPosition) {
-            const bounds = window.L.latLngBounds([
-                [userPosition.lat, userPosition.lng],
-                [sector.latitud, sector.longitud]
-            ]);
-            generalMap.fitBounds(bounds.pad(0.2));
-            detailMap.fitBounds(bounds.pad(0.2));
-        }
-    }
-
-    refreshMaps();
-}
-
-function getPositionFromCoordinates(position) {
-    return {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-    };
-}
-
-function handleGeolocationSuccess(position) {
-    userPosition = getPositionFromCoordinates(position);
-    if (followLocation && activeSector) {
-        updateSectorMap(activeSector);
-    }
-}
-
-function handleGeolocationError(error) {
-    console.warn("No se pudo obtener la ubicación:", error);
-}
-
-function startGeolocation() {
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation) {
-        window.Capacitor.Plugins.Geolocation.getCurrentPosition({ enableHighAccuracy: true })
-            .then(handleGeolocationSuccess)
-            .catch(() => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(handleGeolocationSuccess, handleGeolocationError, { enableHighAccuracy: true });
-                }
-            });
-
-        if (window.Capacitor.Plugins.Geolocation.watchPosition) {
-            window.Capacitor.Plugins.Geolocation.watchPosition({ enableHighAccuracy: true }, (position, error) => {
-                if (error) {
-                    handleGeolocationError(error);
-                    return;
-                }
-                handleGeolocationSuccess(position);
-            });
-        }
-        return;
-    }
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(handleGeolocationSuccess, handleGeolocationError, { enableHighAccuracy: true });
-        locationWatchId = navigator.geolocation.watchPosition(handleGeolocationSuccess, handleGeolocationError, { enableHighAccuracy: true });
-    }
-}
 
 // Cargar datos del API
 async function loadSectoresData() {
@@ -233,18 +20,7 @@ function showSector(sectorId) {
     if (!sector) return;
 
     // Actualizar título
-    const titleContainer = document.getElementById("sector-title");
-    titleContainer.innerHTML = `Mapa: ${sector.nombre}`;
-    updateSectorMap(sector);
-
-    const navBtn = document.createElement("button");
-    navBtn.className = "ml-4 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-full shadow-md transition-all flex items-center gap-1 inline-flex align-middle";
-    navBtn.innerHTML = `📍 <span data-i18n="btn_como_llegar">Cómo llegar</span>`;
-    navBtn.onclick = (e) => {
-        e.stopPropagation();
-        openGoogleMaps(sector);
-    };
-    titleContainer.appendChild(navBtn);
+    document.getElementById("sector-title").textContent = `Mapa: ${sector.nombre}`;
 
     // Generar grilla de espacios
     const grid = document.getElementById("espacios-grid");
@@ -376,7 +152,6 @@ function showSector(sectorId) {
     // Cambiar vistas
     document.getElementById("sectores-view").classList.add("hidden");
     document.getElementById("sector-view").classList.remove("hidden");
-    setTimeout(refreshMaps, 150);
 
     if (typeof applyTranslations === "function") applyTranslations();
 }
@@ -517,22 +292,9 @@ async function takeReportPhoto() {
     }
 }
 
-async function openGoogleMaps(sector) {
-    if (!sector || sector.latitud == null || sector.longitud == null) {
-        alert("Este sector aún no tiene coordenadas configuradas.");
-        return;
-    }
-
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${sector.latitud},${sector.longitud}&travelmode=driving`;
-    window.open(url, "_blank", "noopener,noreferrer");
-}
-
 // Event listeners
 document.addEventListener("DOMContentLoaded", async () => {
     await loadSectoresData();
-    startGeolocation();
-    updateSectorMap(sectoresData?.[0] || null);
-    window.addEventListener("resize", refreshMaps);
 
     // Agregar event listeners a las tarjetas de sector
     document.querySelectorAll(".sector-card button").forEach(button => {
@@ -543,10 +305,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Botón de volver
-    document.getElementById("back-btn").addEventListener("click", () => {
-        showSectores();
-        updateSectorMap(sectoresData?.[0] || null);
-    });
+    document.getElementById("back-btn").addEventListener("click", showSectores);
 });
 
 // Función para monitorear el favorito

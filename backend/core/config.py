@@ -10,7 +10,7 @@ else:
     load_dotenv()
 
 class Settings:
-    DATABASE_URL: str = os.getenv("DATABASE_URL") or "sqlite:///./estacionamiento.db"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./estacionamiento.db")
     SECRET_KEY: str = os.getenv("SECRET_KEY", "3ddd100a30814f6ccf4ddeaf9caa7623")
     DEBUG: bool = os.getenv("DEBUG", "True").lower() in ("true", "1", "t", "yes")
 

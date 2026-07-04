@@ -5,42 +5,6 @@ const DASHBOARD_REFRESH_MS = 5000;
 let lastReportCount = parseInt(localStorage.getItem("ucn_last_report_count") || "0");
 let isDashboardLoading = false;
 
-async function createSector(event) {
-    event.preventDefault();
-    const form = document.getElementById("sector-form");
-    const formData = new FormData(form);
-    const payload = {
-        id: formData.get("id").trim(),
-        nombre: formData.get("nombre").trim(),
-        latitud: parseFloat(formData.get("latitud")),
-        longitud: parseFloat(formData.get("longitud"))
-    };
-
-    try {
-        const session = JSON.parse(localStorage.getItem("ucn_session"));
-        const response = await fetch(`${API_BASE}/sectores`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${session?.access_token || ""}`
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || "No se pudo crear el sector");
-        }
-
-        form.reset();
-        await loadDashboardData();
-        alert("Sector creado correctamente.");
-    } catch (error) {
-        console.error("Error creando sector:", error);
-        alert("No se pudo crear el sector. Revisa que los datos sean válidos.");
-    }
-}
-
 async function loadDashboardData() {
     if (isDashboardLoading) return;
     isDashboardLoading = true;
@@ -219,11 +183,6 @@ async function loadDashboardData() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("sector-form");
-    if (form) {
-        form.addEventListener("submit", createSector);
-    }
-
     loadDashboardData();
 
     const refreshButton = document.getElementById("btn-refresh-dashboard");

@@ -12,31 +12,23 @@ def seed_sectores():
     db = SessionLocal()
     
     sectores_data = [
-        {"id": "A", "nombre": "Sector Guacolda", "num_espacios": 40, "latitud": -29.9645, "longitud": -71.3485},
-        {"id": "B", "nombre": "Sector G5", "num_espacios": 40, "latitud": -29.9652, "longitud": -71.3492},
-        {"id": "C", "nombre": "Sector Vicerrectoría", "num_espacios": 40, "latitud": -29.9638, "longitud": -71.3478},
-        {"id": "D", "nombre": "Sector G6", "num_espacios": 40, "latitud": -29.9660, "longitud": -71.3501}
+        {"id": "A", "nombre": "Sector Guacolda", "num_espacios": 40},
+        {"id": "B", "nombre": "Sector G5", "num_espacios": 40},
+        {"id": "C", "nombre": "Sector Vicerrectoría", "num_espacios": 40},
+        {"id": "D", "nombre": "Sector G6", "num_espacios": 40}
     ]
     
     for s_data in sectores_data:
         sector_id = s_data["id"]
+        # Check if sector exists
         sector = db.query(Sector).filter(Sector.id == sector_id).first()
         if not sector:
-            sector = Sector(
-                id=sector_id,
-                nombre=s_data["nombre"],
-                latitud=s_data.get("latitud"),
-                longitud=s_data.get("longitud")
-            )
+            sector = Sector(id=sector_id, nombre=s_data["nombre"])
             db.add(sector)
             db.commit()
             print(f"Sector {sector.nombre} ({sector_id}) created.")
         else:
-            sector.nombre = s_data["nombre"]
-            sector.latitud = s_data.get("latitud")
-            sector.longitud = s_data.get("longitud")
-            db.commit()
-            print(f"Sector {sector.nombre} ({sector_id}) updated with coordinates.")
+            print(f"Sector {sector.nombre} ({sector_id}) already exists.")
             
         # Create spaces
         for i in range(1, s_data["num_espacios"] + 1):

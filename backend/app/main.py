@@ -6,7 +6,7 @@ import os
 # Asegurar que el entorno reconozca el módulo backend
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database.database import engine, ensure_sector_coordinates_columns
+from database.database import engine
 from database.models import Base
 
 # Importar los routers de los módulos
@@ -15,8 +15,7 @@ from modules.parking.router import router as parking_router
 from modules.users.router import router as users_router
 from modules.dashboard.router import router as dashboard_router
 
-# Crear las tablas en la base de datos si no existen y asegurar columnas de coordenadas
-ensure_sector_coordinates_columns()
+# Crear las tablas en la base de datos si no existen
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
