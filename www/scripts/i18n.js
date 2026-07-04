@@ -4,7 +4,7 @@ const translations = {
         nav_inicio: "Inicio",
         nav_sectores: "Sectores",
         nav_admin: "Administración",
-        nav_contacto: "Contacto y ubicación",
+        nav_contacto: "Contacto",
         lbl_disponible: "Disponible",
         lbl_reservado: "Reservado",
         lbl_ocupado: "Ocupado/Inhabilitado",
@@ -71,8 +71,8 @@ const translations = {
         adm_resolviendo: "Resolviendo...",
 
         // Contacto page
-        con_title: "Contacto y Ubicación",
-        con_desc: "Mapa del recinto e información",
+        con_title: "Contacto",
+        con_desc: "",
         con_dir_title: "Dirección",
         con_dir_val: "Larrondo 1281,<br>Coquimbo, Chile",
         con_tel_title: "Teléfono",
@@ -85,7 +85,7 @@ const translations = {
         nav_inicio: "Home",
         nav_sectores: "Sectors",
         nav_admin: "Administration",
-        nav_contacto: "Contact & Location",
+        nav_contacto: "Contact",
         lbl_disponible: "Available",
         lbl_reservado: "Reserved",
         lbl_ocupado: "Occupied/Disabled",
@@ -152,8 +152,8 @@ const translations = {
         adm_resolviendo: "Resolving...",
 
         // Contact page
-        con_title: "Contact & Location",
-        con_desc: "Campus map and information",
+        con_title: "Contact",
+        con_desc: "",
         con_dir_title: "Address",
         con_dir_val: "Larrondo 1281,<br>Coquimbo, Chile",
         con_tel_title: "Phone",

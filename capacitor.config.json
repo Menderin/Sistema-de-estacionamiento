@@ -1,7 +1,7 @@
 {
   "appId": "com.ucn.estacionamiento",
   "appName": "Estacionamiento UCN",
-  "webDir": "dist",
+  "webDir": "www",
   "bundledWebRuntime": false,
   "server": { "androidScheme": "https" },
   "plugins": {

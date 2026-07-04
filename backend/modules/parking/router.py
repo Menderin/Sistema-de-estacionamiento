@@ -62,7 +62,7 @@ def update_espacio_estado(
     # Flujo 1: Cambio por Sistema (Sensor)
     if x_cambio_por == "sistema":
         actualizado_por = "sistema"
-    # Flujo 2: Cambio Manual (Administrador)
+    # Flujo 2: Cambio Manual (Administrador o Usuario)
     else:
         if not authorization:
             raise HTTPException(
@@ -87,18 +87,46 @@ def update_espacio_estado(
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
             
+        actualizado_por = f"user_{user.id}"
+
         if user.role != RoleEnum.admin:
-            # Si no es admin, solo puede solicitar un espacio, o reportar un problema (dejando el estado igual o pasándolo a inhabilitado si fuera necesario, pero por ahora solo solicitado y mantener estado)
+            # Lógica para Usuarios (No Admins)
+
+            # 1. Intentar liberar su propia reserva
+            is_releasing_own = (update_data.estado == EstadoEnum.disponible and espacio.actualizado_por == actualizado_por)
+
+            # 2. Intentar solicitar un espacio
             is_requesting = (update_data.estado == EstadoEnum.solicitado)
+
+            # 3. Reportar un problema
             is_reporting = (update_data.estado == espacio.estado and update_data.observaciones is not None)
             
-            if not (is_requesting or is_reporting):
+            if is_requesting:
+                # RESTRICCIÓN: Solo una reserva a la vez
+                active_reservation = db.query(Espacio).filter(
+                    Espacio.actualizado_por == actualizado_por,
+                    Espacio.estado == EstadoEnum.solicitado
+                ).first()
+
+                if active_reservation:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Ya tienes una reserva activa en el espacio {active_reservation.id}. Debes liberarla para solicitar otro."
+                    )
+
+                if espacio.estado != EstadoEnum.disponible:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Este espacio no está disponible para reserva."
+                    )
+
+            elif not (is_releasing_own or is_reporting):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Acceso denegado: los usuarios solo pueden solicitar espacios o reportar problemas"
+                    detail="Acceso denegado: los usuarios solo pueden solicitar, reportar o liberar su propia reserva."
                 )
-            actualizado_por = f"user_{user.id}"
         else:
+            # Es Admin
             actualizado_por = f"admin_{user.id}"
     
     # Realizar el cambio de estado o guardar nuevas observaciones

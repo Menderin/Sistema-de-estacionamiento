@@ -140,6 +140,7 @@ async function handleGoogleCredential(response) {
 
         // Guardar sesión
         saveSession({
+            id: userData.id,
             access_token: accessToken,
             nombre: userData.nombre || payload.name,
             email: userData.email || payload.email,
@@ -200,6 +201,7 @@ async function handleTraditionalLogin(e) {
 
         // Guardar sesión
         saveSession({
+            id: userData.id,
             access_token: accessToken,
             nombre: userData.nombre,
             email: userData.email,
