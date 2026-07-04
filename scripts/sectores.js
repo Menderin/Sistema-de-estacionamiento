@@ -3,6 +3,8 @@ import { sendLocalNotification } from "./notifications.js";
 
 let sectoresData = null;
 let favoriteSpace = localStorage.getItem("ucn_favorite_space"); // Cargar favorito guardado
+let mapInstance = null;
+let mapMarkers = {};
 
 // Cargar datos del API
 async function loadSectoresData() {
@@ -18,6 +20,13 @@ async function loadSectoresData() {
 function showSector(sectorId) {
     const sector = sectoresData.find(s => s.id === sectorId);
     if (!sector) return;
+
+    // Destacar en el mapa
+    if (mapInstance && mapMarkers[sectorId]) {
+        const marker = mapMarkers[sectorId];
+        mapInstance.flyTo(marker.getLatLng(), 18); // Zoom suave al sector
+        marker.openPopup();
+    }
 
     // Actualizar título
     document.getElementById("sector-title").textContent = `Mapa: ${sector.nombre}`;
@@ -160,6 +169,12 @@ function showSector(sectorId) {
 function showSectores() {
     document.getElementById("sector-view").classList.add("hidden");
     document.getElementById("sectores-view").classList.remove("hidden");
+
+    // Resetear vista del mapa
+    if (mapInstance) {
+        mapInstance.flyTo([-29.9653, -71.3488], 17);
+        mapInstance.closePopup();
+    }
 }
 
 // Eliminar lógica antigua del modal
@@ -301,12 +316,12 @@ function initMap() {
     const ucnCoords = [-29.9653, -71.3488];
 
     // Crear el mapa
-    const map = L.map('map-sectores').setView(ucnCoords, 17);
+    mapInstance = L.map('map-sectores').setView(ucnCoords, 17);
 
     // Capa de mapa vectorial (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    }).addTo(mapInstance);
 
     // Definir los sectores y sus ubicaciones aproximadas
     const sectores = [
@@ -318,8 +333,10 @@ function initMap() {
 
     // Añadir marcadores
     sectores.forEach(s => {
-        const marker = L.marker(s.coords).addTo(map);
+        const marker = L.marker(s.coords).addTo(mapInstance);
         marker.bindPopup(`<b>Sector ${s.id}</b><br>${s.nombre}`);
+
+        mapMarkers[s.id] = marker; // Guardar referencia
 
         // Hacer que al hacer clic en el marcador también se abra el sector en la app
         marker.on('click', () => {
