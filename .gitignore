@@ -10,3 +10,6 @@ backend/**/__pycache__/**
 .idea/
 .idea/caches/
 .idea/caches/deviceStreaming.xml
+android/app/capacitor.build.gradle
+android/capacitor.settings.gradle
+package-lock.json
