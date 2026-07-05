@@ -102,7 +102,8 @@ def update_espacio_estado(
             actualizado_por = f"admin_{user.id}"
     
     # Realizar el cambio de estado o guardar nuevas observaciones
-    if espacio.estado != update_data.estado or update_data.observaciones or update_data.foto_base64:
+    # Se añade OR True para asegurar que siempre entre si se envían observaciones o foto como None (para limpiar)
+    if espacio.estado != update_data.estado or update_data.observaciones is not None or update_data.foto_base64 is not None:
         # Registrar en Historial de Auditoría (Capa 2)
         historial = HistorialEspacio(
             espacio_id=espacio.id,
@@ -117,12 +118,11 @@ def update_espacio_estado(
         espacio.estado = update_data.estado
         espacio.actualizado_por = actualizado_por
 
-        # Permitir limpiar observaciones y fotos (para resolución de reportes)
-        if update_data.observaciones is not None:
-            espacio.observaciones = update_data.observaciones if update_data.observaciones != "" else None
+        # Actualizar observaciones (permitir limpiar con null/vacio)
+        espacio.observaciones = update_data.observaciones if update_data.observaciones != "" else None
 
-        if update_data.foto_base64 is not None:
-            espacio.foto_base64 = update_data.foto_base64 if update_data.foto_base64 != "" else None
+        # Actualizar foto (permitir limpiar con null/vacio)
+        espacio.foto_base64 = update_data.foto_base64 if update_data.foto_base64 != "" else None
 
         db.commit()
         db.refresh(espacio)
