@@ -82,6 +82,7 @@ def get_reportes(
             "espacio": e.id,
             "mensaje": mensaje,
             "estado": e.estado,
+            "foto_base64": e.foto_base64,
             "actualizado_en": e.actualizado_en
         })
         

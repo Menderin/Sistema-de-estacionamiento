@@ -18,6 +18,30 @@ from modules.dashboard.router import router as dashboard_router
 # Crear las tablas en la base de datos si no existen
 Base.metadata.create_all(bind=engine)
 
+# Lógica de auto-migración para columnas faltantes (SQLite compatibility)
+def run_migrations():
+    from sqlalchemy import inspect, text
+    inspector = inspect(engine)
+    with engine.connect() as conn:
+        # Verificar tabla espacios
+        columns = [c['name'] for c in inspector.get_columns('espacios')]
+        if 'foto_base64' not in columns:
+            print("Migración: Añadiendo columna 'foto_base64' a tabla 'espacios'...")
+            conn.execute(text("ALTER TABLE espacios ADD COLUMN foto_base64 TEXT"))
+            conn.commit()
+
+        # Verificar tabla historial_espacios
+        columns_h = [c['name'] for c in inspector.get_columns('historial_espacios')]
+        if 'foto_base64' not in columns_h:
+            print("Migración: Añadiendo columna 'foto_base64' a tabla 'historial_espacios'...")
+            conn.execute(text("ALTER TABLE historial_espacios ADD COLUMN foto_base64 TEXT"))
+            conn.commit()
+
+try:
+    run_migrations()
+except Exception as e:
+    print(f"Advertencia en migración: {e}")
+
 app = FastAPI(
     title="API Estacionamiento UCN CQBO",
     description="Backend modular del sistema de gestión de estacionamientos de la universidad",

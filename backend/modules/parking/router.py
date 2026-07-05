@@ -116,10 +116,13 @@ def update_espacio_estado(
         
         espacio.estado = update_data.estado
         espacio.actualizado_por = actualizado_por
-        if update_data.observaciones:
-            espacio.observaciones = update_data.observaciones
-        if update_data.foto_base64:
-            espacio.foto_base64 = update_data.foto_base64
+
+        # Permitir limpiar observaciones y fotos (para resolución de reportes)
+        if update_data.observaciones is not None:
+            espacio.observaciones = update_data.observaciones if update_data.observaciones != "" else None
+
+        if update_data.foto_base64 is not None:
+            espacio.foto_base64 = update_data.foto_base64 if update_data.foto_base64 != "" else None
 
         db.commit()
         db.refresh(espacio)

@@ -151,7 +151,29 @@ async function loadDashboardData() {
                         });
 
                         btnConfirmar.addEventListener("click", async () => {
-                            // ... (lógica existente)
+                            const id = btnConfirmar.dataset.espacio;
+                            const estado = btnConfirmar.dataset.estado;
+
+                            btnConfirmar.disabled = true;
+                            btnConfirmar.textContent = "...";
+
+                            const exito = await resolverReporte(id, estado);
+                            if (exito) {
+                                // Animación de salida y remoción
+                                tr.classList.add("opacity-0", "translate-x-4");
+                                setTimeout(() => {
+                                    tr.remove();
+                                    // Si no quedan reportes, mostrar mensaje de vacío
+                                    if (rbody.children.length === 0) {
+                                        rbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 dark:text-gray-400 font-medium" data-i18n="adm_rep_empty">No hay reportes o solicitudes activas.</td></tr>`;
+                                        if (typeof applyTranslations === "function") applyTranslations();
+                                    }
+                                }, 300);
+                            } else {
+                                alert("Error al resolver el reporte. Inténtalo de nuevo.");
+                                btnConfirmar.disabled = false;
+                                btnConfirmar.textContent = "Sí, resolver";
+                            }
                         });
 
                         // Evento para ver foto
@@ -198,7 +220,12 @@ async function resolverReporte(espacioId, estadoActual) {
     if (!session) return false;
 
     try {
-        const payload = { estado: estadoActual, observaciones: "" };
+        // Al resolver, enviamos observaciones: null y foto_base64: null para limpiar el reporte
+        const payload = {
+            estado: estadoActual,
+            observaciones: null,
+            foto_base64: null
+        };
 
         const res = await fetch(`${API_BASE}/espacios/${espacioId}/estado`, {
             method: "PUT",
@@ -209,11 +236,7 @@ async function resolverReporte(espacioId, estadoActual) {
             body: JSON.stringify(payload)
         });
 
-        if (!res.ok) {
-            return false;
-        }
-
-        return true;
+        return res.ok;
     } catch (error) {
         console.error("Error al resolver:", error);
         return false;
