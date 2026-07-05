@@ -1,4 +1,4 @@
-import { API_BASE } from "./config.js";
+import { API_BASE, SECTOR_COORDINATES } from "./config.js";
 import { sendLocalNotification } from "./notifications.js";
 
 let sectoresData = null;
@@ -20,7 +20,18 @@ function showSector(sectorId) {
     if (!sector) return;
 
     // Actualizar título
-    document.getElementById("sector-title").textContent = `Mapa: ${sector.nombre}`;
+    const titleContainer = document.getElementById("sector-title");
+    titleContainer.innerHTML = `Mapa: ${sector.nombre}`;
+
+    // Agregar botón de navegación al lado del título
+    const navBtn = document.createElement("button");
+    navBtn.className = "ml-4 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-full shadow-md transition-all flex items-center gap-1 inline-flex align-middle";
+    navBtn.innerHTML = `📍 <span data-i18n="btn_como_llegar">Cómo llegar</span>`;
+    navBtn.onclick = (e) => {
+        e.stopPropagation();
+        openGoogleMaps(sectorId);
+    };
+    titleContainer.appendChild(navBtn);
 
     // Generar grilla de espacios
     const grid = document.getElementById("espacios-grid");
@@ -278,9 +289,126 @@ async function takeReportPhoto() {
     }
 }
 
+// Función para abrir Google Maps (Nativo o Web)
+async function openGoogleMaps(sectorId) {
+    const coords = SECTOR_COORDINATES[sectorId];
+    if (!coords) return;
+
+    let userLat = null;
+    let userLng = null;
+
+    // Intentar obtener ubicación para modo navegación
+    if (window.Capacitor) {
+        try {
+            const Geolocation = window.Capacitor.Plugins.Geolocation;
+            const pos = await Geolocation.getCurrentPosition({ timeout: 5000 });
+            userLat = pos.coords.latitude;
+            userLng = pos.coords.longitude;
+        } catch (e) { console.warn("No se pudo obtener ubicación para origen:", e); }
+    }
+
+    let url = "";
+    if (userLat && userLng) {
+        url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${coords.lat},${coords.lng}&travelmode=driving`;
+    } else {
+        url = `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}`;
+    }
+
+    if (window.Capacitor) {
+        const Browser = window.Capacitor.Plugins.Browser;
+        await Browser.open({ url: url });
+    } else {
+        window.open(url, '_blank');
+    }
+}
+
+// Función para encontrar el sector óptimo (más cercano con disponibilidad)
+async function findOptimalSector() {
+    if (!window.Capacitor) {
+        alert("La función de GPS para buscar el sector óptimo solo está disponible en la aplicación móvil.");
+        return;
+    }
+
+    const btn = document.getElementById("btn-optimal");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "⌛ Buscando...";
+    btn.disabled = true;
+
+    try {
+        const Geolocation = window.Capacitor.Plugins.Geolocation;
+
+        // Verificar y solicitar permisos
+        const permissions = await Geolocation.checkPermissions();
+        if (permissions.location !== 'granted') {
+            const request = await Geolocation.requestPermissions();
+            if (request.location !== 'granted') {
+                throw new Error("Permisos de ubicación denegados");
+            }
+        }
+
+        const position = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 10000
+        });
+
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+
+        // Filtrar sectores con espacios disponibles
+        const availableSectors = sectoresData.filter(s =>
+            s.espacios.some(e => e.estado === "disponible")
+        );
+
+        if (availableSectors.length === 0) {
+            alert("No hay estacionamientos disponibles en ningún sector actualmente.");
+            return;
+        }
+
+        // Encontrar el más cercano
+        let closestSector = null;
+        let minDistance = Infinity;
+
+        availableSectors.forEach(sector => {
+            const coords = SECTOR_COORDINATES[sector.id];
+            if (coords) {
+                const dist = Math.sqrt(
+                    Math.pow(userLat - coords.lat, 2) +
+                    Math.pow(userLng - coords.lng, 2)
+                );
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestSector = sector;
+                }
+            }
+        });
+
+        if (closestSector) {
+            if (confirm(`Sector óptimo: ${closestSector.nombre} (Es el más cercano con espacios libres).\n\n¿Deseas iniciar la navegación?`)) {
+                const url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${SECTOR_COORDINATES[closestSector.id].lat},${SECTOR_COORDINATES[closestSector.id].lng}&travelmode=driving`;
+                await window.Capacitor.Plugins.Browser.open({ url: url });
+            }
+        }
+    } catch (error) {
+        console.error("Error GPS:", error);
+        alert("Error: " + (error.message || "No se pudo obtener la ubicación"));
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
 // Event listeners
 document.addEventListener("DOMContentLoaded", async () => {
     await loadSectoresData();
+
+    // Inyectar botón de "Sugerir Estacionamiento Óptimo"
+    const container = document.querySelector("#sectores-view .grid").parentElement;
+    const optimalBtn = document.createElement("button");
+    optimalBtn.id = "btn-optimal";
+    optimalBtn.className = "w-full mb-8 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transform transition hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3";
+    optimalBtn.innerHTML = `✨ <span data-i18n="btn_buscar_optimo">Buscar Estacionamiento Óptimo (GPS)</span>`;
+    optimalBtn.onclick = findOptimalSector;
+    container.prepend(optimalBtn);
 
     // Agregar event listeners a las tarjetas de sector
     document.querySelectorAll(".sector-card button").forEach(button => {

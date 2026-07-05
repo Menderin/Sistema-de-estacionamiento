@@ -3,6 +3,17 @@ import { sendLocalNotification } from "./notifications.js";
 
 let sectoresData = null;
 let favoriteSpace = localStorage.getItem("ucn_favorite_space"); // Cargar favorito guardado
+let mapInstance = null;
+let mapMarkers = {};
+let routingControl = null;
+let userMarker = null;
+
+const SECTOR_COORDS = {
+    'A': [-29.962750, -71.347774],
+    'B': [-29.963210, -71.349157],
+    'C': [-29.964610, -71.347855],
+    'D': [-29.963880, -71.348023]
+};
 
 // Cargar datos del API
 async function loadSectoresData() {
@@ -18,6 +29,13 @@ async function loadSectoresData() {
 function showSector(sectorId) {
     const sector = sectoresData.find(s => s.id === sectorId);
     if (!sector) return;
+
+    // Destacar en el mapa
+    if (mapInstance && mapMarkers[sectorId]) {
+        const marker = mapMarkers[sectorId];
+        mapInstance.flyTo(marker.getLatLng(), 18); // Zoom suave al sector
+        marker.openPopup();
+    }
 
     // Actualizar título
     document.getElementById("sector-title").textContent = `Mapa: ${sector.nombre}`;
@@ -67,9 +85,14 @@ function showSector(sectorId) {
             } else {
                 let html = "";
                 html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-yellow-600 hover:bg-yellow-50 btn-fav-toggle" data-id="${espacio.id}">${favIcon} ${favText}</button>`;
+
+                const userTag = `user_${session.id}`;
                 if (espacio.estado === "disponible") {
                     html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 btn-action" data-action="solicitado">Solicitar</button>`;
+                } else if (espacio.estado === "solicitado" && espacio.actualizado_por === userTag) {
+                    html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-green-600 hover:bg-green-50 btn-action" data-action="disponible">Liberar Reserva</button>`;
                 }
+
                 html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-orange-600 hover:bg-orange-50 btn-action" data-action="reportar">Reportar</button>`;
                 dropdown.innerHTML = html;
             }
@@ -160,6 +183,18 @@ function showSector(sectorId) {
 function showSectores() {
     document.getElementById("sector-view").classList.add("hidden");
     document.getElementById("sectores-view").classList.remove("hidden");
+
+    // Resetear vista del mapa
+    if (mapInstance) {
+        mapInstance.flyTo([-29.9637, -71.3485], 17);
+        mapInstance.closePopup();
+
+        // Limpiar ruta al volver
+        if (routingControl) {
+            mapInstance.removeControl(routingControl);
+            routingControl = null;
+        }
+    }
 }
 
 // Eliminar lógica antigua del modal
@@ -208,13 +243,21 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
             console.log("Respuesta Nativa:", response);
 
             if (response.status >= 200 && response.status < 300) {
+                // Si se solicita, mostrar la ruta
+                if (estado === "solicitado") {
+                    calculateRoute(espacioId.charAt(0));
+                    // Pequeño aviso de cortesía
+                    console.log("Nueva reserva activa. Cualquier reserva previa ha sido liberada automáticamente.");
+                }
+
                 closeAllDropdowns();
                 await loadSectoresData();
                 showSector(espacioId.charAt(0));
                 return;
             } else {
                 console.error(`[ERROR NATIVO] Status: ${response.status}`, response.data);
-                alert(`Error del servidor (${response.status}): No se pudo guardar.`);
+                const msg = response.data?.detail || "No se pudo completar la acción.";
+                alert(`Error: ${msg}`);
                 return;
             }
         }
@@ -230,10 +273,15 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
         });
 
         if (!res.ok) {
-            const errorText = await res.text();
-            console.error(`[ERROR API] Status: ${res.status}, Body: ${errorText}`);
-            alert(`Error del servidor (${res.status}): No se pudo guardar el reporte.`);
+            const errData = await res.json();
+            const msg = errData.detail || "Error al actualizar el espacio.";
+            alert(`Error: ${msg}`);
             return;
+        }
+
+        // Si se solicita, mostrar la ruta
+        if (estado === "solicitado") {
+            calculateRoute(espacioId.charAt(0));
         }
 
         // Refrescar datos y UI
@@ -292,9 +340,125 @@ async function takeReportPhoto() {
     }
 }
 
-// Event listeners
+// Función para obtener ubicación GPS y calcular ruta
+async function calculateRoute(sectorId) {
+    if (!mapInstance) return;
+
+    const getPosition = () => {
+        return new Promise((resolve, reject) => {
+            // Intentar con Capacitor primero (Nativo)
+            if (window.Capacitor && window.Capacitor.Plugins.Geolocation) {
+                window.Capacitor.Plugins.Geolocation.getCurrentPosition({ enableHighAccuracy: true })
+                    .then(pos => resolve(pos))
+                    .catch(err => {
+                        console.warn("Capacitor Geolocation falló, intentando navegador...", err);
+                        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+                    });
+            } else {
+                // Fallback para Navegador PC
+                navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+            }
+        });
+    };
+
+    try {
+        console.log("Calculando ruta al sector:", sectorId);
+
+        // Mostrar aviso de carga
+        const loadingMsg = alert("Solicitando permisos de GPS... Por favor, acepta el permiso en tu navegador o celular.");
+
+        const position = await getPosition();
+        const userCoords = [position.coords.latitude, position.coords.longitude];
+        const destCoords = SECTOR_COORDS[sectorId];
+
+        if (!destCoords) return;
+
+        // Limpiar ruta previa
+        if (routingControl) {
+            mapInstance.removeControl(routingControl);
+        }
+
+        // Crear marcador de usuario
+        if (userMarker) {
+            userMarker.setLatLng(userCoords);
+        } else {
+            userMarker = L.marker(userCoords, {
+                icon: L.icon({
+                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1077/1077114.png',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                })
+            }).addTo(mapInstance).bindPopup("Tu ubicación");
+        }
+
+        // Crear ruta vehicular
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(userCoords[0], userCoords[1]),
+                L.latLng(destCoords[0], destCoords[1])
+            ],
+            lineOptions: {
+                styles: [{ color: '#3B82F6', weight: 6, opacity: 0.8 }]
+            },
+            routeWhileDragging: false,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true,
+            show: false,
+            router: L.Routing.osrmv1({
+                serviceUrl: 'https://router.project-osrm.org/route/v1'
+            })
+        }).addTo(mapInstance);
+
+    } catch (error) {
+        console.error("Error GPS detallado:", error);
+        alert("No se pudo obtener la ubicación. Asegúrate de tener el GPS activado y haber dado permisos en el navegador.");
+    }
+}
+
+// Inicializar Mapa con Marcadores de Sectores
+function initMap() {
+    const mapElement = document.getElementById('map-sectores');
+    if (!mapElement) return;
+
+    // Coordenadas centrales UCN Coquimbo (Centrado en puntos exactos)
+    const ucnCoords = [-29.9637, -71.3485];
+
+    // Crear el mapa
+    mapInstance = L.map('map-sectores').setView(ucnCoords, 17);
+
+    // Capa de mapa vectorial (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(mapInstance);
+
+    // Definir los sectores y sus ubicaciones exactas
+    const sectores = [
+        { id: 'A', nombre: 'Sector Guacolda', coords: SECTOR_COORDS['A'] },
+        { id: 'B', nombre: 'Sector G5', coords: SECTOR_COORDS['B'] },
+        { id: 'C', nombre: 'Sector Vicerrectoría', coords: SECTOR_COORDS['C'] },
+        { id: 'D', nombre: 'Sector G6', coords: SECTOR_COORDS['D'] }
+    ];
+
+    // Añadir marcadores
+    sectores.forEach(s => {
+        const marker = L.marker(s.coords).addTo(mapInstance);
+        marker.bindPopup(`<b>Sector ${s.id}</b><br>${s.nombre}`);
+
+        mapMarkers[s.id] = marker; // Guardar referencia
+
+        // Hacer que al hacer clic en el marcador también se abra el sector en la app
+        marker.on('click', () => {
+            showSector(s.id);
+        });
+    });
+}
+
+// Inicializar al cargar el script
 document.addEventListener("DOMContentLoaded", async () => {
     await loadSectoresData();
+    initMap(); // Inicializar el mapa
+    initOrientationCheck(); // Nueva función de rotación
 
     // Agregar event listeners a las tarjetas de sector
     document.querySelectorAll(".sector-card button").forEach(button => {
@@ -340,3 +504,36 @@ async function checkFavoriteStatus() {
 
 // Iniciar monitoreo cada 10 segundos
 setInterval(checkFavoriteStatus, 10000);
+
+// Función para manejar la rotación de pantalla
+function initOrientationCheck() {
+    const handleOrientation = () => {
+        const mapContainer = document.getElementById('map-sectores');
+        if (!mapContainer) return;
+
+        // Si el ancho es mayor al alto, estamos en modo landscape (horizontal)
+        if (window.innerWidth > window.innerHeight) {
+            console.log("Modo Landscape detectado - Expandiendo mapa");
+            mapContainer.classList.add('map-fullscreen');
+
+            // Forzar a Leaflet a recalcular el tamaño del mapa
+            if (mapInstance) {
+                setTimeout(() => mapInstance.invalidateSize(), 300);
+            }
+
+            // Opcional: Notificación al usuario
+            // sendLocalNotification("Modo Mapa Extendido", "Gira el teléfono para volver a la lista.");
+        } else {
+            console.log("Modo Portrait detectado - Restaurando vista");
+            mapContainer.classList.remove('map-fullscreen');
+
+            if (mapInstance) {
+                setTimeout(() => mapInstance.invalidateSize(), 300);
+            }
+        }
+    };
+
+    // Escuchar el cambio de tamaño/orientación
+    window.addEventListener('resize', handleOrientation);
+    window.addEventListener('orientationchange', handleOrientation);
+}
