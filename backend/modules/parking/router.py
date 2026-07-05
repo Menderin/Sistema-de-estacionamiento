@@ -155,12 +155,10 @@ def update_espacio_estado(
         
         espacio.estado = update_data.estado
         espacio.actualizado_por = actualizado_por
-
-        # Actualizar observaciones (permitir limpiar con null/vacio)
-        espacio.observaciones = update_data.observaciones
-
-        # Actualizar foto (permitir limpiar con null/vacio)
-        espacio.foto_base64 = update_data.foto_base64
+        if update_data.observaciones:
+            espacio.observaciones = update_data.observaciones
+        if update_data.foto_base64:
+            espacio.foto_base64 = update_data.foto_base64
 
         db.commit()
         db.refresh(espacio)

@@ -151,22 +151,7 @@ async function loadDashboardData() {
                         });
 
                         btnConfirmar.addEventListener("click", async () => {
-                            const id = btnConfirmar.dataset.espacio;
-                            const estado = btnConfirmar.dataset.estado;
-
-                            btnConfirmar.disabled = true;
-                            btnConfirmar.textContent = "...";
-
-                            const ok = await resolverReporte(id, estado);
-                            if (ok) {
-                                dropdown.classList.remove("max-h-48", "opacity-100", "scale-100");
-                                dropdown.classList.add("max-h-0", "opacity-0", "scale-95");
-                                loadDashboardData(); // Recargar para limpiar la tabla
-                            } else {
-                                alert("Error al resolver el reporte");
-                                btnConfirmar.disabled = false;
-                                btnConfirmar.textContent = "Sí, resolver";
-                            }
+                            // ... (lógica existente)
                         });
 
                         // Evento para ver foto
@@ -213,12 +198,7 @@ async function resolverReporte(espacioId, estadoActual) {
     if (!session) return false;
 
     try {
-        // Para resolver, vaciamos observaciones Y la foto
-        const payload = {
-            estado: estadoActual,
-            observaciones: null,
-            foto_base64: null
-        };
+        const payload = { estado: estadoActual, observaciones: "" };
 
         const res = await fetch(`${API_BASE}/espacios/${espacioId}/estado`, {
             method: "PUT",
@@ -230,8 +210,6 @@ async function resolverReporte(espacioId, estadoActual) {
         });
 
         if (!res.ok) {
-            const err = await res.json();
-            console.error("Error backend:", err);
             return false;
         }
 
@@ -240,5 +218,4 @@ async function resolverReporte(espacioId, estadoActual) {
         console.error("Error al resolver:", error);
         return false;
     }
-}
 }
