@@ -9,10 +9,10 @@ let routingControl = null;
 let userMarker = null;
 
 const SECTOR_COORDS = {
-    'A': [-29.9658, -71.3482],
-    'B': [-29.9648, -71.3490],
-    'C': [-29.9642, -71.3485],
-    'D': [-29.9662, -71.3492]
+    'A': [-29.962750, -71.347774],
+    'B': [-29.963210, -71.349157],
+    'C': [-29.964610, -71.347855],
+    'D': [-29.963880, -71.348023]
 };
 
 // Cargar datos del API
@@ -186,7 +186,7 @@ function showSectores() {
 
     // Resetear vista del mapa
     if (mapInstance) {
-        mapInstance.flyTo([-29.9653, -71.3488], 17);
+        mapInstance.flyTo([-29.9637, -71.3485], 17);
         mapInstance.closePopup();
 
         // Limpiar ruta al volver
@@ -421,8 +421,8 @@ function initMap() {
     const mapElement = document.getElementById('map-sectores');
     if (!mapElement) return;
 
-    // Coordenadas centrales UCN Coquimbo
-    const ucnCoords = [-29.9653, -71.3488];
+    // Coordenadas centrales UCN Coquimbo (Centrado en puntos exactos)
+    const ucnCoords = [-29.9637, -71.3485];
 
     // Crear el mapa
     mapInstance = L.map('map-sectores').setView(ucnCoords, 17);
@@ -432,12 +432,12 @@ function initMap() {
         attribution: '© OpenStreetMap contributors'
     }).addTo(mapInstance);
 
-    // Definir los sectores y sus ubicaciones aproximadas
+    // Definir los sectores y sus ubicaciones exactas
     const sectores = [
-        { id: 'A', nombre: 'Sector Guacolda', coords: [-29.9658, -71.3482] },
-        { id: 'B', nombre: 'Sector G5', coords: [-29.9648, -71.3490] },
-        { id: 'C', nombre: 'Sector Vicerrectoría', coords: [-29.9642, -71.3485] },
-        { id: 'D', nombre: 'Sector G6', coords: [-29.9662, -71.3492] }
+        { id: 'A', nombre: 'Sector Guacolda', coords: SECTOR_COORDS['A'] },
+        { id: 'B', nombre: 'Sector G5', coords: SECTOR_COORDS['B'] },
+        { id: 'C', nombre: 'Sector Vicerrectoría', coords: SECTOR_COORDS['C'] },
+        { id: 'D', nombre: 'Sector G6', coords: SECTOR_COORDS['D'] }
     ];
 
     // Añadir marcadores
