@@ -9,8 +9,13 @@ async function loadDashboardData() {
     if (isDashboardLoading) return;
     isDashboardLoading = true;
 
+    const session = JSON.parse(localStorage.getItem("ucn_session"));
+    const token = session ? session.access_token : null;
+
     try {
-        const response = await fetch(`${API_BASE}/sectores`);
+        const response = await fetch(`${API_BASE}/sectores`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
