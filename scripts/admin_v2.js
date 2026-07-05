@@ -77,6 +77,23 @@ async function loadDashboardData() {
         document.getElementById("dash-pct").textContent = `${ocupacionPct}%`;
         document.getElementById("dash-bar").style.width = `${ocupacionPct}%`;
 
+        // Intentar cargar métricas oficiales del backend
+        try {
+            const metricsRes = await fetch(`${API_BASE}/dashboard/metrics`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (metricsRes.ok) {
+                const metrics = await metricsRes.json();
+                document.getElementById("dash-libres").textContent = metrics.disponibles;
+                document.getElementById("dash-totales").textContent = `/ ${metrics.total_espacios}`;
+                document.getElementById("dash-pct").textContent = `${Math.round(metrics.ocupacion_pct)}%`;
+                document.getElementById("dash-bar").style.width = `${metrics.ocupacion_pct}%`;
+                if(elemDashTotalesSec) elemDashTotalesSec.textContent = metrics.total_sectores;
+            }
+        } catch (e) {
+            console.warn("No se pudieron cargar métricas extendidas:", e);
+        }
+
         // Cargar reportes
         const session = JSON.parse(localStorage.getItem("ucn_session"));
         const token = session ? session.access_token : null;
