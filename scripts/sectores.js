@@ -7,6 +7,7 @@ let mapInstance = null;
 let mapMarkers = {};
 let routingControl = null;
 let userMarker = null;
+let currentActiveSectorId = null;
 
 const SECTOR_COORDS = {
     'A': [SECTOR_COORDINATES['A'].lat, SECTOR_COORDINATES['A'].lng],
@@ -26,14 +27,22 @@ async function loadSectoresData() {
 }
 
 // Mostrar vista de sector
-function showSector(sectorId) {
+function showSector(sectorId, isAutoRefresh = false) {
     const sector = sectoresData.find(s => s.id === sectorId);
     if (!sector) return;
+
+    currentActiveSectorId = sectorId;
 
     // Destacar en el mapa
     if (mapInstance && mapMarkers[sectorId]) {
         const marker = mapMarkers[sectorId];
-        mapInstance.flyTo(marker.getLatLng(), 18); // Zoom suave al sector
+
+        // SOLO HACER ZOOM SI NO HAY UNA RUTA ACTIVA
+        // Si hay ruta, dejamos que Leaflet Routing maneje el encuadre
+        if (!routingControl) {
+            mapInstance.flyTo(marker.getLatLng(), 18); // Zoom suave al sector
+        }
+
         marker.openPopup();
     }
 
@@ -180,14 +189,11 @@ function showSectores() {
 
     // Resetear vista del mapa
     if (mapInstance) {
-        mapInstance.flyTo([-29.9637, -71.3485], 17);
-        mapInstance.closePopup();
-
-        // Limpiar ruta al volver
-        if (routingControl) {
-            mapInstance.removeControl(routingControl);
-            routingControl = null;
+        // SOLO HACER ZOOM SI NO HAY UNA RUTA ACTIVA
+        if (!routingControl) {
+            mapInstance.flyTo([-29.9637, -71.3485], 17);
         }
+        mapInstance.closePopup();
     }
 }
 
@@ -234,10 +240,16 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
 
             const response = await Http.put(options);
             if (response.status >= 200 && response.status < 300) {
-                if (estado === "solicitado") calculateRoute(espacioId.charAt(0));
                 closeAllDropdowns();
                 await loadSectoresData();
-                showSector(espacioId.charAt(0));
+
+                // Primero mostramos el sector (con flag isAutoRefresh=true para no borrar ruta)
+                showSector(espacioId.charAt(0), true);
+
+                // Luego trazamos la ruta (el zoom de la ruta ganará al de showSector)
+                if (estado === "solicitado") {
+                    calculateRoute(espacioId.charAt(0));
+                }
                 return;
             }
         }
@@ -253,10 +265,15 @@ async function updateEspacioState(espacioId, estado, observaciones = null, foto 
         });
 
         if (res.ok) {
-            if (estado === "solicitado") calculateRoute(espacioId.charAt(0));
             closeAllDropdowns();
             await loadSectoresData();
-            showSector(espacioId.charAt(0));
+
+            // Primero mostramos el sector (con flag isAutoRefresh=true para no borrar ruta)
+            showSector(espacioId.charAt(0), true);
+
+            if (estado === "solicitado") {
+                calculateRoute(espacioId.charAt(0));
+            }
         }
     } catch (error) {
         console.error("Error al actualizar:", error);
@@ -383,24 +400,81 @@ function initMap() {
 function initOrientationCheck() {
     const handleOrientation = () => {
         const mapContainer = document.getElementById('map-sectores');
+        const header = document.querySelector('.app-header');
+        const nav = document.querySelector('.app-nav');
+        const mainTitle = document.querySelector('main section');
+        const sectoresView = document.getElementById('sectores-view');
+        const sectorView = document.getElementById('sector-view');
+
         if (!mapContainer) return;
 
         if (window.innerWidth > window.innerHeight) {
+            // MODO LANDSCAPE (Horizontal) - Limpiar pantalla para el mapa
             mapContainer.classList.add('map-fullscreen');
-            if (mapInstance) setTimeout(() => mapInstance.invalidateSize(), 300);
+            if (header) header.style.display = 'none';
+            if (nav) nav.style.display = 'none';
+            if (mainTitle) mainTitle.style.display = 'none';
+            if (sectoresView) sectoresView.style.display = 'none';
+            if (sectorView) sectorView.style.display = 'none';
+
+            if (mapInstance) {
+                setTimeout(() => mapInstance.invalidateSize(), 400);
+            }
         } else {
+            // MODO PORTRAIT (Vertical) - Restaurar UI
             mapContainer.classList.remove('map-fullscreen');
-            if (mapInstance) setTimeout(() => mapInstance.invalidateSize(), 300);
+            if (header) header.style.display = '';
+            if (nav) nav.style.display = '';
+            if (mainTitle) mainTitle.style.display = '';
+
+            // Solo restaurar la vista que corresponde
+            if (sectoresView && !document.getElementById('sector-view').classList.contains('hidden')) {
+                // Estamos en vista de un sector, no mostrar la grilla de sectores
+                sectoresView.style.display = 'none';
+            } else if (sectoresView) {
+                sectoresView.style.display = '';
+            }
+
+            if (sectorView && !sectorView.classList.contains('hidden')) {
+                sectorView.style.display = '';
+            }
+
+            if (mapInstance) {
+                setTimeout(() => mapInstance.invalidateSize(), 400);
+            }
         }
     };
     window.addEventListener('resize', handleOrientation);
+    window.addEventListener('orientationchange', handleOrientation);
 }
 
 // Inicializar al cargar
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadSectoresData();
+    // Iniciar carga de datos y mapa en paralelo
+    const dataPromise = loadSectoresData();
     initMap();
     initOrientationCheck();
+
+    await dataPromise; // Esperar solo lo necesario
+
+    // PERSISTENCIA DE RUTA ULTRA-RÁPIDA
+    const session = JSON.parse(localStorage.getItem("ucn_session"));
+    if (session && session.id) {
+        const userTag = session.role === "admin" ? `admin_${session.id}` : `user_${session.id}`;
+        let activeSectorId = null;
+
+        sectoresData.forEach(sector => {
+            if (sector.espacios.some(e => e.estado === "solicitado" && e.actualizado_por === userTag)) {
+                activeSectorId = sector.id;
+            }
+        });
+
+        if (activeSectorId) {
+            console.log("Restaurando ruta prioritaria...");
+            // Usamos un tiempo mínimo para asegurar que el DOM esté listo
+            setTimeout(() => calculateRoute(activeSectorId), 300);
+        }
+    }
 
     document.querySelectorAll(".sector-card button").forEach(button => {
         button.addEventListener("click", (e) => {
