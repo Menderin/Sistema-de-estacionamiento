@@ -98,8 +98,6 @@ function showSector(sectorId, isAutoRefresh = false) {
                 const userTag = `user_${session.id}`;
                 if (espacio.estado === "disponible") {
                     html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 btn-action" data-action="solicitado">Solicitar</button>`;
-                } else if (espacio.estado === "solicitado" && espacio.actualizado_por === userTag) {
-                    html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-green-600 hover:bg-green-50 btn-action" data-action="disponible">Liberar Reserva</button>`;
                 }
 
                 html += `<button class="w-full text-center px-2 py-3 text-sm font-bold text-orange-600 hover:bg-orange-50 btn-action" data-action="reportar">Reportar</button>`;
