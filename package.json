@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "tailwindcss -i ./assets/css/styles.css -o ./assets/css/output.css",
+    "build": "tailwindcss -i ./assets/css/styles.css -o ./assets/css/output.css && npm run build-dist",
+    "build-dist": "powershell -Command \"Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Path dist; Copy-Item index.html, login.js, sectores.js dist/; Copy-Item -Recurse pages, assets, scripts dist/\"",
     "watch": "tailwindcss -i ./assets/css/styles.css -o ./assets/css/output.css --watch"
   },
   "devDependencies": {
