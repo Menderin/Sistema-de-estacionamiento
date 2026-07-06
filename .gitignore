@@ -1,4 +1,6 @@
 node_modules/
+dist/
+www/
 assets/css/output.css*
 cambios.md
 test/
