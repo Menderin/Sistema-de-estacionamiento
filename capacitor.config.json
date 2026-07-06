@@ -6,6 +6,7 @@
   "server": { "androidScheme": "https" },
   "plugins": {
     "CapacitorHttp": { "enabled": true },
-    "Camera": { "enabled": true }
+    "Camera": { "enabled": true },
+    "Geolocation": { "enabled": true }
   }
 }
